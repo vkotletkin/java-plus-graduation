@@ -22,7 +22,7 @@ public class PublicCategoryController {
     }
 
     @GetMapping("/{category-id}")
-    public CategoryDto getCategoryById(@PathVariable(name = "category-id") Long catId) throws NotFoundException {
-        return categoryService.getCategoryById(catId);
+    public CategoryDto getCategoryById(@PathVariable(name = "category-id") Long categoryId) throws NotFoundException {
+        return categoryService.getCategoryById(categoryId);
     }
 }

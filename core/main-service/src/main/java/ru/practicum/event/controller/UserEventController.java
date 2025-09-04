@@ -19,7 +19,7 @@ import ru.practicum.exception.WrongDataException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users/{userId}/events")
+@RequestMapping("/users/{user-id}/events")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserEventController {
@@ -27,7 +27,7 @@ public class UserEventController {
     final UserEventService eventService;
 
     @GetMapping
-    public List<EventShortDto> getUserEvents(@PathVariable Long userId,
+    public List<EventShortDto> getUserEvents(@PathVariable(name = "user-id") Long userId,
                                              @RequestParam(defaultValue = "0") Integer from,
                                              @RequestParam(defaultValue = "10") Integer count) throws NotFoundException {
         return eventService.getUserEvents(userId, from, count);
@@ -35,20 +35,20 @@ public class UserEventController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto addEvent(@PathVariable Long userId,
+    public EventFullDto addEvent(@PathVariable(name = "user-id") Long userId,
                                  @Valid @RequestBody NewEventDto event) throws ValidationException, WrongDataException, NotFoundException {
         return eventService.addEvent(userId, event);
     }
 
-    @GetMapping("/{eventId}")
-    public EventFullDto getEventById(@PathVariable Long userId,
-                                     @PathVariable Long eventId) throws ValidationException, NotFoundException {
+    @GetMapping("/{event-id}")
+    public EventFullDto getEventById(@PathVariable(name = "user-id") Long userId,
+                                     @PathVariable(name = "event-id") Long eventId) throws ValidationException, NotFoundException {
         return eventService.getEventById(userId, eventId);
     }
 
-    @PatchMapping("/{eventId}")
-    public EventFullDto updateEvent(@PathVariable Long userId,
-                                    @PathVariable Long eventId,
+    @PatchMapping("/{event-id}")
+    public EventFullDto updateEvent(@PathVariable(name = "user-id") Long userId,
+                                    @PathVariable(name = "event-id") Long eventId,
                                     @Valid @RequestBody UpdateEventUserRequest event) throws ValidationException, ConflictException, WrongDataException, NotFoundException {
         return eventService.updateEvent(userId, eventId, event);
     }

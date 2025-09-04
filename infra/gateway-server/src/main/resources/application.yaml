@@ -20,4 +20,4 @@ eureka:
   client:
     registerWithEureka: true
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/
+      defaultZone: "http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/"

@@ -12,14 +12,14 @@ import java.util.Collection;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/events/{eventId}/comments")
+@RequestMapping("/events/{event-id}/comments")
 public class CommentController {
 
     private final CommentService service;
 
     @GetMapping
     public Collection<CommentDto> getByEvent(
-            @PathVariable Long eventId,
+            @PathVariable(name = "event-id") Long eventId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size) throws NotFoundException {
         return service.getAllEventComments(eventId, from, size);

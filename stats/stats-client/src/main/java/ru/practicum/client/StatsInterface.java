@@ -11,8 +11,6 @@ import ru.practicum.dto.StatsResponseDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-@RestController
 public interface StatsInterface {
 
     @GetMapping("/stats")

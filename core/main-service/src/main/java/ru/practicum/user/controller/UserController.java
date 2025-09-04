@@ -31,9 +31,9 @@ public class UserController {
         return userService.addUser(newUser);
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{user-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long userId) {
+    public void deleteUser(@PathVariable(name = "user-id") Long userId) {
         userService.deleteUser(userId);
     }
 }

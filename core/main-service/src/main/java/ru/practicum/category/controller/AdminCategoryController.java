@@ -24,14 +24,14 @@ public class AdminCategoryController {
     }
 
     @PatchMapping("/{category-id}")
-    public CategoryDto updateCategory(@PathVariable(name = "category-id") Long catId,
+    public CategoryDto updateCategory(@PathVariable(name = "category-id") Long categoryId,
                                       @Valid @RequestBody CategoryDto categoryDto) throws ConflictException, NotFoundException {
-        return categoryService.updateCategory(catId, categoryDto);
+        return categoryService.updateCategory(categoryId, categoryDto);
     }
 
     @DeleteMapping("/{category-id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable(name = "category-id") Long catId) throws ConflictException, NotFoundException {
-        categoryService.deleteCategory(catId);
+    public void deleteCategory(@PathVariable(name = "category-id") Long categoryId) throws ConflictException, NotFoundException {
+        categoryService.deleteCategory(categoryId);
     }
 }
