@@ -1,6 +1,9 @@
 package ru.practicum.compilation.dto;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.event.dto.EventShortDto;
 

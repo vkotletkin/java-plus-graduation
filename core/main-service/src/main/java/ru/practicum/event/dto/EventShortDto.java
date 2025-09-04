@@ -6,11 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.client.util.JsonFormatPattern;
 import ru.practicum.user.dto.UserDto;
 
 import java.time.LocalDateTime;
-
-import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Getter
 @Setter
@@ -28,7 +27,7 @@ public class EventShortDto {
     UserDto initiator;
 
     @NotNull
-    @JsonFormat(pattern = JSON_FORMAT_PATTERN_FOR_TIME)
+    @JsonFormat(pattern = JsonFormatPattern.TIME_PATTERN)
     LocalDateTime eventDate;
 
     Boolean paid;

@@ -3,6 +3,7 @@ package ru.practicum.event.dto;
 import lombok.experimental.UtilityClass;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.model.Category;
+import ru.practicum.client.util.JsonFormatPattern;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.user.dto.UserMapper;
@@ -10,7 +11,6 @@ import ru.practicum.user.dto.UserMapper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @UtilityClass
 public class EventMapper {
@@ -65,13 +65,13 @@ public class EventMapper {
         if (time == null) {
             return null;
         }
-        return time.format(DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+        return time.format(DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
     }
 
     static LocalDateTime getFromString(String time) {
         if (time == null) {
             return null;
         }
-        return LocalDateTime.parse(time, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+        return LocalDateTime.parse(time, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
     }
 }

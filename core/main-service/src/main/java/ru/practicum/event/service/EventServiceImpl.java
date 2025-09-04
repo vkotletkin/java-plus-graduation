@@ -1,13 +1,12 @@
 package ru.practicum.event.service;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.client.StatsClient;
+import ru.practicum.client.util.JsonFormatPattern;
 import ru.practicum.dto.StatsRequestDto;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventMapper;
@@ -24,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Service
 @Slf4j
@@ -52,7 +50,7 @@ public class EventServiceImpl implements EventService {
         EventFullDto eventFullDto = EventMapper.mapEventToFullDto(event, confirmed);
 
         List<String> urls = Collections.singletonList(uri);
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
         LocalDateTime end = LocalDateTime.now();
         var views = statsClient.getStats(start, end, urls, true).size();
         eventFullDto.setViews(views);
@@ -84,7 +82,7 @@ public class EventServiceImpl implements EventService {
                 if (rangeStart == null) {
                     startDate = LocalDateTime.now();
                 } else {
-                    startDate = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                    startDate = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
                 }
                 if (text == null) {
                     text = "";
@@ -93,7 +91,7 @@ public class EventServiceImpl implements EventService {
                     events = eventRepository.findEventsByText("%" + text.toLowerCase() + "%", EventState.PUBLISHED,
                             PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "e.eventDate")));
                 } else {
-                    endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                    endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
                     if (startDate.isAfter(endDate)) {
                         throw new ValidationException("Дата и время начала поиска не должна быть позже даты и времени конца поиска");
                     } else {
@@ -109,12 +107,12 @@ public class EventServiceImpl implements EventService {
             if (rangeStart == null) {
                 startDate = LocalDateTime.now();
             } else {
-                startDate = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                startDate = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
             }
             if (rangeEnd == null) {
                 endDate = null;
             } else {
-                endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
             }
             if (rangeStart != null && rangeEnd != null) {
                 if (startDate.isAfter(endDate)) {

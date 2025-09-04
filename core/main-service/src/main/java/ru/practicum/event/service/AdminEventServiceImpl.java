@@ -1,8 +1,6 @@
 package ru.practicum.event.service;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -10,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.client.StatsClient;
+import ru.practicum.client.util.JsonFormatPattern;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventMapper;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
@@ -31,7 +30,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Slf4j
 @Service
@@ -169,7 +167,7 @@ public class AdminEventServiceImpl implements AdminEventService {
             event.setDescription(updateRequest.getDescription());
         }
         if (updateRequest.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(updateRequest.getEventDate(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME)));
+            event.setEventDate(LocalDateTime.parse(updateRequest.getEventDate(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN)));
         }
         if (updateRequest.getLocation() != null) {
             event.setLocation(updateRequest.getLocation());
@@ -208,7 +206,7 @@ public class AdminEventServiceImpl implements AdminEventService {
 
     private EventFullDto getViewsCounter(EventFullDto eventFullDto) {
         ArrayList<String> urls = new ArrayList<>(List.of("/events/" + eventFullDto.getId()));
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
         LocalDateTime end = LocalDateTime.now();
 
         Integer views = statsClient.getStats(start, end, urls, true).size();

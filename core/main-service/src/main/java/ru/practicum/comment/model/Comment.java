@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.client.util.JsonFormatPattern;
 import ru.practicum.event.model.Event;
 import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Entity
 @Getter
@@ -44,6 +44,6 @@ public class Comment {
     boolean isInitiator;
 
     @Column(name = "created", nullable = false)
-    @JsonFormat(pattern = JSON_FORMAT_PATTERN_FOR_TIME)
+    @JsonFormat(pattern = JsonFormatPattern.TIME_PATTERN)
     LocalDateTime created;
 }
