@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+
+    loadbalancer:
+      configurations: health-check
+      retry:
+        enabled: true
+
+    gateway:
+      actuator.verbose.enabled: false
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: service_route
+          uri: lb://MAIN-SERVICE
+          predicates:
+            - Path=/admin/**,/events/**,/users/**,/compilations/**,/categories/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
