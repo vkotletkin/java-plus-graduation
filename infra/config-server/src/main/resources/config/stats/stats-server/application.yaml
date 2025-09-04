@@ -1,6 +1,6 @@
 server:
   port: 0
-  uri: http://stats-server:{server.port}
+  uri: "http://stats-server:{server.port}"
 
 spring:
 

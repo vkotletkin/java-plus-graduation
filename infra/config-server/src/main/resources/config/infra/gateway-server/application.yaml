@@ -10,7 +10,6 @@ spring:
         enabled: true
 
     gateway:
-      actuator.verbose.enabled: false
       discovery:
         locator:
           enabled: true
@@ -18,7 +17,7 @@ spring:
         - id: service_route
           uri: lb://MAIN-SERVICE
           predicates:
-            - Path=/admin/**,/events/**,/users/**,/compilations/**,/categories/**
+            - Path=/admin/**,/categories/**,/events/**,/users/**,/compilations/**
 
 management:
   endpoints:
