@@ -15,6 +15,8 @@ import ru.practicum.exception.NotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.exception.NotFoundException.notFoundException;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws NotFoundException, ConflictException {
 
         Category category = categoryRepository.findById(catId)
-                .orElseThrow(() -> new NotFoundException("Категория с ID " + catId + " не найдена."));
+                .orElseThrow(notFoundException("Категория с ID: {0} - не найдена", catId));
 
         boolean categoryExists = categoryRepository.findByName(categoryDto.getName()).stream()
                 .anyMatch(c -> !c.getId().equals(catId));

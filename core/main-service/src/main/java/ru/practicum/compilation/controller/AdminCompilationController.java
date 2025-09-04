@@ -19,6 +19,8 @@ import ru.practicum.exception.ValidationException;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminCompilationController {
 
+    private final static String COMPILATION_PATH = "/{compilation-id}";
+
     final CompilationService compilationService;
 
     @PostMapping
@@ -27,13 +29,13 @@ public class AdminCompilationController {
         return compilationService.addCompilation(compilationDto);
     }
 
-    @PatchMapping("/{compilation-id}")
+    @PatchMapping(COMPILATION_PATH)
     public ResponseCompilationDto update(@PathVariable(name = "compilation-id") Long compId,
                                          @Valid @RequestBody UpdateCompilationRequest compilationDto) throws NotFoundException {
         return compilationService.updateCompilation(compId, compilationDto);
     }
 
-    @DeleteMapping("/{compilation-id}")
+    @DeleteMapping(COMPILATION_PATH)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable(name = "compilation-id") Long compId) throws ValidationException, NotFoundException {
         compilationService.deleteCompilation(compId);

@@ -25,9 +25,9 @@ public class PublicCompilationController {
         return compilationService.getCompilations(pinned, from, size);
     }
 
-    @GetMapping("/{compId}")
-    public ResponseCompilationDto getCompilationById(@PathVariable Long compId) throws NotFoundException {
-        return compilationService.getCompilationById(compId);
+    @GetMapping("/{compilation-id}")
+    public ResponseCompilationDto getCompilationById(@PathVariable(name = "compilation-id") Long compilationId) throws NotFoundException {
+        return compilationService.getCompilationById(compilationId);
     }
 
 

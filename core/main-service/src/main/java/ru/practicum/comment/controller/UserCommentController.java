@@ -20,6 +20,8 @@ import java.util.Collection;
 @RequestMapping("/users/{user-id}/comments")
 public class UserCommentController {
 
+    private final static String COMMENT_PATH = "/{comment-id}";
+
     private final CommentService service;
 
     @PostMapping
@@ -31,7 +33,7 @@ public class UserCommentController {
         return service.addComment(commentDto, userId, eventId);
     }
 
-    @DeleteMapping("/{comment-id}")
+    @DeleteMapping(COMMENT_PATH)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(
             @PathVariable(name = "comment-id") @NonNull Long commentId,
@@ -39,7 +41,7 @@ public class UserCommentController {
         service.delete(userId, commentId);
     }
 
-    @PatchMapping("/{comment-id}")
+    @PatchMapping(COMMENT_PATH)
     public CommentDto updateComment(
             @PathVariable(name = "user-id") Long userId,
             @PathVariable(name = "comment-id") Long commentId,

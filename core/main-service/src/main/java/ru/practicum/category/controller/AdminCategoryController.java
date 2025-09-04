@@ -15,6 +15,8 @@ import ru.practicum.exception.NotFoundException;
 @RequestMapping("/admin/categories")
 public class AdminCategoryController {
 
+    private static final String CATEGORY_PATH = "/{category-id}";
+
     private final CategoryService categoryService;
 
     @PostMapping
@@ -23,13 +25,13 @@ public class AdminCategoryController {
         return categoryService.addCategory(newCategory);
     }
 
-    @PatchMapping("/{category-id}")
+    @PatchMapping(CATEGORY_PATH)
     public CategoryDto updateCategory(@PathVariable(name = "category-id") Long categoryId,
                                       @Valid @RequestBody CategoryDto categoryDto) throws ConflictException, NotFoundException {
         return categoryService.updateCategory(categoryId, categoryDto);
     }
 
-    @DeleteMapping("/{category-id}")
+    @DeleteMapping(CATEGORY_PATH)
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable(name = "category-id") Long categoryId) throws ConflictException, NotFoundException {
         categoryService.deleteCategory(categoryId);
