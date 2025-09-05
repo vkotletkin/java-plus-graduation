@@ -14,5 +14,10 @@
 
     <modules>
         <module>interaction-api</module>
+        <module>category-service</module>
+        <module>comment-service</module>
+        <module>event-service</module>
+        <module>request-service</module>
+        <module>user-service</module>
     </modules>
 </project>

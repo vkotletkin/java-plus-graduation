@@ -1,10 +1,8 @@
 package ru.practicum.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import ru.practicum.api.category.AdminCategoryApi;
-import ru.practicum.api.category.InnerCategoryApi;
-import ru.practicum.api.category.PublicCategoryApi;
+import ru.practicum.api.category.ConventialCategoryApi;
 
 @FeignClient(name = "category-service")
-public interface CategoryFeignClient extends PublicCategoryApi, AdminCategoryApi, InnerCategoryApi {
+public interface CategoryFeignClient extends ConventialCategoryApi {
 }

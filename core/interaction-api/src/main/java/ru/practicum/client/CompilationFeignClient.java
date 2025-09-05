@@ -1,9 +1,8 @@
 package ru.practicum.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import ru.practicum.api.compilation.AdminCompilationApi;
-import ru.practicum.api.compilation.PublicCompilationApi;
+import ru.practicum.api.compilation.ConventialCompilationApi;
 
 @FeignClient(name = "compilation-service")
-public interface CompilationFeignClient extends AdminCompilationApi, PublicCompilationApi {
+public interface CompilationFeignClient extends ConventialCompilationApi {
 }
