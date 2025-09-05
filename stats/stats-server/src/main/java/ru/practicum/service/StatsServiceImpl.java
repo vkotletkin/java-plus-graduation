@@ -1,9 +1,8 @@
 package ru.practicum.service;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.StatsRequestDto;
@@ -18,16 +17,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@Slf4j
 public class StatsServiceImpl implements StatsService {
 
-    final StatsRepository statsRepository;
+    private final StatsRepository statsRepository;
 
     @Transactional
     public StatsRequestDto save(StatsRequestDto requestDto) {
-        log.info("Save request to {}", requestDto);
         try {
             var savedRequest = statsRepository.save(Mapper.toRequest(requestDto));
             return Mapper.toRequestDto(savedRequest);
