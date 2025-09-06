@@ -34,6 +34,7 @@ public class StatsServiceImpl implements StatsService {
     }
 
     public List<StatsResponseDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+
         if (start.isAfter(end)) {
             throw new ValidationException("Время окончания позже начала");
         }

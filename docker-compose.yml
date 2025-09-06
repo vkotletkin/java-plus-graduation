@@ -4,7 +4,7 @@ services:
     image: postgres:16.1
     container_name: explore-postgres-stats
     ports:
-      - "6432:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=explore-stats
       - POSTGRES_USER=explore-stats
@@ -19,7 +19,7 @@ services:
     image: postgres:16.1
     container_name: explore-postgres-main
     ports:
-      - "6433:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_PASSWORD=explore-main
       - POSTGRES_USER=explore-main
