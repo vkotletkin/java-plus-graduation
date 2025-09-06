@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
-public class ErrorHandler {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

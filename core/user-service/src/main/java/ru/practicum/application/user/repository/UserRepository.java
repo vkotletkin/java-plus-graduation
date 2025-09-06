@@ -9,17 +9,9 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    User getUserById(Long id);
-
     boolean existsByName(String name);
 
     @Query("SELECT u FROM User u " +
             "WHERE(u.id in :ids)")
     List<User> findAllByIdsPageable(List<Long> ids, Pageable page);
-
-    @Query("SELECT u FROM User u")
-    List<User> findAllPageable(Pageable page);
-
-    @Query("SELECT u.id FROM User u")
-    List<Long> findAllId();
 }

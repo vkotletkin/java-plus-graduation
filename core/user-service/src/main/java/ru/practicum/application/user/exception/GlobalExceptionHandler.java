@@ -1,4 +1,4 @@
-package ru.practicum.application.user.controller;
+package ru.practicum.application.user.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,9 +12,9 @@ import ru.practicum.exception.ValidationException;
 
 import java.util.Map;
 
-@RestControllerAdvice
 @Slf4j
-public class ErrorHandler {
+@RestControllerAdvice
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -28,29 +28,29 @@ public class ErrorHandler {
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleWrongData(final ValidationException e) {
-        log.error("Validation error: " + e.getMessage());
+    public Map<String, String> handleValidationException(final ValidationException e) {
+        log.error("Validation error: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleWrongData(final NotFoundException e) {
-        log.error("Not found: " + e.getMessage());
+    public Map<String, String> handleNotFoundException(final NotFoundException e) {
+        log.error("Not found exception: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleWrongData(final ConflictException e) {
-        log.error("Conflict: " + e.getMessage());
+    public Map<String, String> handleConflictException(final ConflictException e) {
+        log.error("Conflict exception: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleError(final Throwable e) {
-        log.error("Unknown: " + e.getMessage());
+        log.error("Unprocessed exception: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 }

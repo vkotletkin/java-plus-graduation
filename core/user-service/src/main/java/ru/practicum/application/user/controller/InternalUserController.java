@@ -1,12 +1,14 @@
 package ru.practicum.application.user.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.api.user.InternalUserApi;
+import ru.practicum.application.user.service.UserService;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.application.user.service.UserService;
-import ru.practicum.api.user.InternalUserApi;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 public class InternalUserController implements InternalUserApi {

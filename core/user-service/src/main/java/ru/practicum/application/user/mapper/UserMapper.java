@@ -1,16 +1,26 @@
 package ru.practicum.application.user.mapper;
 
-import lombok.experimental.UtilityClass;
-import ru.practicum.dto.user.UserDto;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import ru.practicum.application.user.model.User;
+import ru.practicum.dto.user.UserDto;
 
-@UtilityClass
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
-    public User mapDtoToUser(UserDto userDto) {
-        return new User(userDto.getId(), userDto.getName(), userDto.getEmail());
+
+    public static User toModel(UserDto userDto) {
+        return User.builder()
+                .id(userDto.getId())
+                .name(userDto.getName())
+                .email(userDto.getEmail())
+                .build();
     }
 
-    public UserDto mapUserToDto(User user) {
-        return new UserDto(user.getId(), user.getName(), user.getEmail());
+    public static UserDto toDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
     }
 }

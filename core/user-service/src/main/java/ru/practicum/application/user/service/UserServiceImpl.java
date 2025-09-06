@@ -1,56 +1,59 @@
 package ru.practicum.application.user.service;
 
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.application.user.mapper.UserMapper;
+import ru.practicum.application.user.model.User;
+import ru.practicum.application.user.repository.UserRepository;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.application.user.mapper.UserMapper;
-import ru.practicum.application.user.repository.UserRepository;
-import ru.practicum.application.user.model.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.exception.NotFoundException.notFoundException;
+
 @Service
-@Slf4j
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
-    final UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
     public UserDto addUser(UserDto newUserDto) throws ConflictException {
+
         if (userRepository.existsByName(newUserDto.getName())) {
-            throw new ConflictException(String.format("Пользователь %s уже существует", newUserDto.getName()));
+            throw new ConflictException("Пользователь с именем: {0} уже существует", newUserDto.getName());
         }
-        User savedUser = userRepository.save(UserMapper.mapDtoToUser(newUserDto));
-        return UserMapper.mapUserToDto(savedUser);
+
+        User savedUser = userRepository.save(UserMapper.toModel(newUserDto));
+
+        return UserMapper.toDto(savedUser);
     }
 
     @Override
     public UserDto getUserById(Long userId) throws NotFoundException {
-        var user = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException(String.format("Пользователь с id = %d не найден", userId)));
-        return UserMapper.mapUserToDto(user);
+
+        User user = userRepository.findById(userId).orElseThrow(
+                notFoundException("Пользователь с идентификатором: {0} не найден", userId));
+
+        return UserMapper.toDto(user);
     }
 
     @Override
     public List<UserDto> getUsersByIdList(List<Long> ids, Pageable page) {
+
         List<User> users = (ids == null || ids.isEmpty()) ?
                 userRepository.findAll(page).getContent() :
                 userRepository.findAllByIdsPageable(ids, page);
-        return users.stream()
-                .map(UserMapper::mapUserToDto)
-                .collect(Collectors.toList());
+
+        return users.stream().map(UserMapper::toDto).collect(Collectors.toList());
     }
 
     @Override

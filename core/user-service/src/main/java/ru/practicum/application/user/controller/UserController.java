@@ -1,28 +1,25 @@
 package ru.practicum.application.user.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.api.user.UserApi;
+import ru.practicum.application.user.service.UserService;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.ConflictException;
-import ru.practicum.application.user.service.UserService;
-import ru.practicum.api.user.UserApi;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController implements UserApi {
 
-    final UserService userService;
+    private final UserService userService;
 
     @Override
-    public List<UserDto> getUsersList(List<Long> ids,
-                                      Integer from,
-                                      Integer size) {
+    public List<UserDto> getUsersList(List<Long> ids, Integer from, Integer size) {
         return userService.getUsersByIdList(ids, PageRequest.of(from, size));
     }
 
@@ -35,5 +32,4 @@ public class UserController implements UserApi {
     public void deleteUser(Long userId) {
         userService.deleteUser(userId);
     }
-
 }
