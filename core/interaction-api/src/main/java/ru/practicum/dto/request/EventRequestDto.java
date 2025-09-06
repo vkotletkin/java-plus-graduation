@@ -5,24 +5,16 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class EventRequestDto {
-
     Long id;
-
     String status;
-
     Long event;
-
     Long requester;
-
     String created;
-
     List<EventRequestDto> confirmedRequests;
-
     List<EventRequestDto> rejectedRequests;
 }

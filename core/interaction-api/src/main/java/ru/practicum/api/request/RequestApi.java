@@ -1,6 +1,7 @@
 package ru.practicum.api.request;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.exception.ConflictException;
@@ -9,6 +10,7 @@ import ru.practicum.exception.ValidationException;
 
 import java.util.List;
 
+@Validated
 public interface RequestApi {
 
     String USERS_BY_ID_REQUESTS_PATH = "/users/{user-id}/requests";

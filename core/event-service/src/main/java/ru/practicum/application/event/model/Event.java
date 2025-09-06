@@ -11,12 +11,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "events")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ToString
 public class Event {
 
     @Id

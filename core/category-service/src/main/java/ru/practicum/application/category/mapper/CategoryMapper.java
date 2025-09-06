@@ -1,8 +1,8 @@
 package ru.practicum.application.category.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.application.category.model.Category;
+import ru.practicum.dto.category.CategoryDto;
 
 @UtilityClass
 public class CategoryMapper {
@@ -11,7 +11,10 @@ public class CategoryMapper {
     }
 
     public static CategoryDto mapCategory(Category category) {
-        return new CategoryDto(category.getId(), category.getName());
+        return CategoryDto.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .build();
     }
 
 }

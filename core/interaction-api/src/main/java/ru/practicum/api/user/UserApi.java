@@ -2,12 +2,14 @@ package ru.practicum.api.user;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.ConflictException;
 
 import java.util.List;
 
+@Validated
 public interface UserApi {
 
     String ADMIN_USERS_PATH = "/admin/users";

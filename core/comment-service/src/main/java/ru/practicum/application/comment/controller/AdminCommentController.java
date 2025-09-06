@@ -22,7 +22,14 @@ public class AdminCommentController implements AdminCommentApi {
 
     @Override
     public Collection<CommentDto> getComments(Long eventId, Integer from, Integer size) throws NotFoundException {
-        return service.getAllEventComments(new GetCommentsAdminRequest(eventId, from, size));
+
+        GetCommentsAdminRequest getCommentsAdminRequest = GetCommentsAdminRequest.builder()
+                .eventId(eventId)
+                .from(from)
+                .size(size)
+                .build();
+
+        return service.getAllEventComments(getCommentsAdminRequest);
     }
 
     @Override

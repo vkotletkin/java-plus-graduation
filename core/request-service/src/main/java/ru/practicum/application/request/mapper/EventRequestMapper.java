@@ -4,22 +4,23 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.application.request.model.EventRequest;
+import ru.practicum.util.JsonFormatPattern;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 
 @Component
 @AllArgsConstructor
 public class EventRequestMapper {
+
     public EventRequestDto mapRequest(EventRequest request) {
         EventRequestDto dto = new EventRequestDto();
         dto.setId(request.getId());
         dto.setRequester(request.getRequester());
         dto.setEvent(request.getEvent());
-        dto.setCreated(request.getCreated().format(DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME)));
+        dto.setCreated(request.getCreated().format(DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN)));
         dto.setStatus(request.getStatus());
         return dto;
     }

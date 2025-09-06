@@ -3,6 +3,7 @@ package ru.practicum.api.event;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +14,7 @@ import ru.practicum.exception.ValidationException;
 
 import java.util.List;
 
+@Validated
 public interface PublicEventApi {
     String EVENTS_PATH = "/events";
 

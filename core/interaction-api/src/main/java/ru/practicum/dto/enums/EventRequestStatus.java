@@ -1,12 +1,13 @@
 package ru.practicum.dto.enums;
 
-import lombok.experimental.UtilityClass;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
-@UtilityClass
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventRequestStatus {
-    public final String PENDING_REQUEST = "PENDING";
-    public final String CONFIRMED_REQUEST = "CONFIRMED";
-    public final String REJECTED_REQUEST = "REJECTED";
-    public final String ACCEPTED_REQUEST = "ACCEPTED";
-    public final String CANCELED_REQUEST = "CANCELED";
+    public static final String PENDING_REQUEST = "PENDING";
+    public static final String CONFIRMED_REQUEST = "CONFIRMED";
+    public static final String REJECTED_REQUEST = "REJECTED";
+    public static final String ACCEPTED_REQUEST = "ACCEPTED";
+    public static final String CANCELED_REQUEST = "CANCELED";
 }

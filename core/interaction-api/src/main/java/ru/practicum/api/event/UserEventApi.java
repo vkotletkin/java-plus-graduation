@@ -2,6 +2,7 @@ package ru.practicum.api.event;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
@@ -14,6 +15,7 @@ import ru.practicum.request.event.UpdateEventUserRequest;
 
 import java.util.List;
 
+@Validated
 public interface UserEventApi {
 
     String USERS_BY_ID_EVENTS_PATH = "/users/{user-id}/events";

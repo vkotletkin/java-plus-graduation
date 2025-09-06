@@ -4,13 +4,10 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Accessors(chain = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Data
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class GetCommentsAdminRequest {
     Long eventId;
     Integer from;
