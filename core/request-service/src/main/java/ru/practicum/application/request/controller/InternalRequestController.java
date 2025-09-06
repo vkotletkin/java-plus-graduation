@@ -1,21 +1,20 @@
 package ru.practicum.application.request.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.dto.request.EventRequestDto;
-import ru.practicum.application.request.service.EventRequestService;
 import ru.practicum.api.request.InternalEventRequestApi;
+import ru.practicum.application.request.service.EventRequestService;
+import ru.practicum.dto.request.EventRequestDto;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class InternalRequestController implements InternalEventRequestApi {
 
-    final EventRequestService service;
+    private final EventRequestService service;
 
     @Override
     public Long countByEventAndStatuses(Long eventId, List<String> statuses) {

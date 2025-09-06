@@ -19,7 +19,7 @@ public interface RequestApi {
     @PostMapping(USERS_BY_ID_REQUESTS_PATH)
     @ResponseStatus(HttpStatus.CREATED)
     EventRequestDto addEventRequest(@PathVariable(name = "user-id") Long userId,
-                                    @RequestParam Long eventId
+                                    @RequestParam(name = "eventId") Long eventId
     ) throws ConflictException, NotFoundException;
 
     @GetMapping(USERS_BY_ID_REQUESTS_PATH)

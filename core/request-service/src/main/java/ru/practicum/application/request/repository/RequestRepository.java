@@ -8,27 +8,18 @@ import java.util.List;
 
 public interface RequestRepository extends JpaRepository<EventRequest, Long> {
 
-    @Query("SELECT r FROM EventRequest r " +
-            "WHERE r.requester = :userId ")
+    @Query("SELECT r FROM EventRequest r WHERE r.requester = :userId ")
     List<EventRequest> findByUserId(Long userId);
 
-    @Query("SELECT r FROM EventRequest r " +
-            "WHERE r.event = :eventId")
+    @Query("SELECT r FROM EventRequest r WHERE r.event = :eventId")
     List<EventRequest> findByEventId(Long eventId);
 
-    @Query("SELECT r FROM EventRequest r " +
-            "WHERE r.event in :eventIds ")
+    @Query("SELECT r FROM EventRequest r WHERE r.event in :eventIds ")
     List<EventRequest> findByEventIds(List<Long> eventIds);
 
-    List<EventRequest> findRequestByEventAndStatus(Long eventId, String status);
-
-    @Query("SELECT COUNT(r) FROM EventRequest r " +
-            "WHERE r.event = :eventId " +
-            "AND r.status in :statuses")
+    @Query("SELECT COUNT(r) FROM EventRequest r WHERE r.event = :eventId AND r.status in :statuses")
     Long countByEventAndStatuses(Long eventId, List<String> statuses);
 
-    @Query("SELECT r FROM EventRequest r " +
-            "WHERE r.event in :eventIds " +
-            "AND r.status = :status")
+    @Query("SELECT r FROM EventRequest r WHERE r.event in :eventIds AND r.status = :status")
     List<EventRequest> findByEventIdsAndStatus(List<Long> eventIds, String status);
 }

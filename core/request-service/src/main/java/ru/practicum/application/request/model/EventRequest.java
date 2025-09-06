@@ -6,10 +6,10 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
+@Data
 @Entity
+@Builder
 @Table(name = "requests")
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
