@@ -28,9 +28,9 @@ spring:
 
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/explore-main
-    username: explore-main
-    password: explore-main
+    url: jdbc:postgresql://localhost:5432/ewm_category
+    username: postgres
+    password: postgres
 
 logging:
   level:
