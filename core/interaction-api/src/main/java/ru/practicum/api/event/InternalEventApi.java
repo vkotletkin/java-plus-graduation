@@ -11,7 +11,7 @@ import ru.practicum.exception.NotFoundException;
 import java.util.List;
 
 @Validated
-public interface InnerEventApi {
+public interface InternalEventApi {
 
     String INNER_EVENT_PATH = "/internal/event";
 

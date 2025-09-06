@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.application.user.service.UserService;
-import ru.practicum.api.user.InnerUserApi;
+import ru.practicum.api.user.InternalUserApi;
 
 @RestController
 @RequiredArgsConstructor
-public class InnerUserController implements InnerUserApi {
+public class InternalUserController implements InternalUserApi {
 
     private final UserService userService;
 

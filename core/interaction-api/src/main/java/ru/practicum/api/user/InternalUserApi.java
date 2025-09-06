@@ -7,7 +7,7 @@ import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.NotFoundException;
 
 @Validated
-public interface InnerUserApi {
+public interface InternalUserApi {
 
     String INNER_USER_BY_ID_PATH = "/internal/user/{user-id}";
 

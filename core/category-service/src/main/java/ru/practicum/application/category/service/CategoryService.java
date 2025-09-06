@@ -8,6 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 public interface CategoryService {
+
+    void deleteCategory(Long catId) throws ConflictException, NotFoundException;
+
+    List<CategoryDto> getCategoriesByIds(Set<Long> ids);
+
+    boolean existById(Long categoryId);
+
     CategoryDto addCategory(CategoryDto categoryDto) throws ConflictException;
 
     CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws NotFoundException, ConflictException;
@@ -15,11 +22,5 @@ public interface CategoryService {
     CategoryDto getCategoryById(Long catId) throws NotFoundException;
 
     List<CategoryDto> getAllCategories(Integer from, Integer size);
-
-    void deleteCategory(Long catId) throws ConflictException, NotFoundException;
-
-    List<CategoryDto> getCategoriesByIds(Set<Long> ids);
-
-    boolean existById(Long categoryId);
 
 }

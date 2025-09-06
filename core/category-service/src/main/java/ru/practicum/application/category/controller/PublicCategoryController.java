@@ -1,9 +1,7 @@
 package ru.practicum.application.category.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.api.category.PublicCategoryApi;
@@ -13,12 +11,12 @@ import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
 
+@Validated
 @RestController
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class PublicCategoryController implements PublicCategoryApi {
 
-    final CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @Override
     public List<CategoryDto> getAllCategories(@RequestParam(defaultValue = "0") Integer from,

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 @Validated
-public interface InnerCategoryApi {
+public interface InternalCategoryApi {
 
     String INNER_CATEGORY_PATH = "/internal/category";
 

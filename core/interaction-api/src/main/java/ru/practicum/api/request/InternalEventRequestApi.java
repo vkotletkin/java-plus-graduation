@@ -9,7 +9,7 @@ import ru.practicum.dto.request.EventRequestDto;
 import java.util.List;
 
 @Validated
-public interface InnerEventRequestApi {
+public interface InternalEventRequestApi {
 
     String INNER_REQUEST_PATH = "/internal/request";
 

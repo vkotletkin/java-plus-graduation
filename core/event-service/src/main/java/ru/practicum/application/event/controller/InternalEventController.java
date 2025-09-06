@@ -9,14 +9,14 @@ import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.application.event.service.InnerEventService;
-import ru.practicum.api.event.InnerEventApi;
+import ru.practicum.api.event.InternalEventApi;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InnerEventController implements InnerEventApi {
+public class InternalEventController implements InternalEventApi {
 
     final InnerEventService innerEventService;
 

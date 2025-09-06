@@ -1,9 +1,7 @@
 package ru.practicum.application.category.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.api.category.AdminCategoryApi;
 import ru.practicum.application.category.service.CategoryService;
@@ -12,11 +10,12 @@ import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
 
+@Validated
 @RestController
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class AdminCategoryController implements AdminCategoryApi {
-    final CategoryService categoryService;
+
+    private final CategoryService categoryService;
 
     @Override
     public CategoryDto addCategory(CategoryDto newCategory) throws ConflictException {

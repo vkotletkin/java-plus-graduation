@@ -6,14 +6,14 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.application.request.service.EventRequestService;
-import ru.practicum.api.request.InnerEventRequestApi;
+import ru.practicum.api.request.InternalEventRequestApi;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InnerRequestController implements InnerEventRequestApi {
+public class InternalRequestController implements InternalEventRequestApi {
 
     final EventRequestService service;
 
