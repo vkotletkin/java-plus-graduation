@@ -3,9 +3,8 @@ package ru.practicum.application.event.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import ru.practicum.application.compilation.model.Compilation;
 import ru.practicum.dto.enums.EventState;
+import ru.practicum.application.compilation.model.Compilation;
 
 import java.time.LocalDateTime;
 import java.util.List;

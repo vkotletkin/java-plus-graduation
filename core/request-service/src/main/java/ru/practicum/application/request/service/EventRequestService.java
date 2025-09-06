@@ -1,9 +1,9 @@
 package ru.practicum.application.request.service;
 
-import ru.practicum.application.api.dto.request.EventRequestDto;
-import ru.practicum.application.api.exception.ConflictException;
-import ru.practicum.application.api.exception.NotFoundException;
-import ru.practicum.application.api.exception.ValidationException;
+import ru.practicum.dto.request.EventRequestDto;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 
 import java.util.List;
 

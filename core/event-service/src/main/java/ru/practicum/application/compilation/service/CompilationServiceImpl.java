@@ -24,7 +24,6 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.request.compilation.UpdateCompilationRequest;
 
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -132,13 +131,13 @@ public class CompilationServiceImpl implements CompilationService {
 
     private List<ResponseCompilationDto> compileDtosWithEvents(List<Compilation> compilations) {
         List<Event> events = new ArrayList<>();
-        for (Compilation compilation: compilations) {
+        for (Compilation compilation : compilations) {
             events.addAll(compilation.getEvents());
         }
 
         List<Long> usersIds = events.stream().map(Event::getInitiator).toList();
         Set<Long> categoriesIds = events.stream().map(Event::getCategory).collect(Collectors.toSet());
-                Map<Long, UserDto> users = userClient.getUsersList(usersIds, 0, Math.max(events.size(), 1)).stream()
+        Map<Long, UserDto> users = userClient.getUsersList(usersIds, 0, Math.max(events.size(), 1)).stream()
                 .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
         Map<Long, CategoryDto> categories = categoryClient.getCategoriesByIds(categoriesIds).stream()
                 .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));

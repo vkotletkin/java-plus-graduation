@@ -1,11 +1,9 @@
 package ru.practicum.application.compilation.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.application.compilation.model.Compilation;
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.dto.compilation.ResponseCompilationDto;
-
-import java.util.stream.Collectors;
+import ru.practicum.application.compilation.model.Compilation;
 
 @UtilityClass
 public class CompilationMapper {

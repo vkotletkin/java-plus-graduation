@@ -1,6 +1,5 @@
 package ru.practicum.application.comment.service;
 
-
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;

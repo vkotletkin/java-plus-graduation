@@ -6,7 +6,8 @@ import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "categories")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)

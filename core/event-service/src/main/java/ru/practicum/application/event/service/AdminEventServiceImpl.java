@@ -1,6 +1,8 @@
 package ru.practicum.application.event.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,7 +26,6 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.exception.WrongDataException;
 import ru.practicum.request.event.UpdateEventAdminRequest;
-import ru.practicum.util.JsonFormatPattern;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,18 +33,20 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminEventServiceImpl implements AdminEventService {
-    private final EventRepository eventRepository;
-    private final LocationRepository locationRepository;
+    final EventRepository eventRepository;
+    final LocationRepository locationRepository;
 
-    private final UserFeignClient userClient;
-    private final CategoryFeignClient categoryClient;
-    private final RequestFeignClient requestClient;
-    private final StatsClient statsClient;
+    final UserFeignClient userClient;
+    final CategoryFeignClient categoryClient;
+    final RequestFeignClient requestClient;
+    final StatsClient statsClient;
 
     @Override
     public List<EventFullDto> getEvents(List<Long> users, List<String> states, List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) throws ValidationException {
@@ -197,7 +200,7 @@ public class AdminEventServiceImpl implements AdminEventService {
             event.setDescription(updateRequest.getDescription());
         }
         if (updateRequest.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(updateRequest.getEventDate(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN)));
+            event.setEventDate(LocalDateTime.parse(updateRequest.getEventDate(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME)));
         }
         if (updateRequest.getLocation() != null) {
             event.setLocation(EventMapper.mapDtoToLocation(updateRequest.getLocation()));
@@ -236,7 +239,7 @@ public class AdminEventServiceImpl implements AdminEventService {
 
     EventFullDto getViewsCounter(EventFullDto eventFullDto) {
         ArrayList<String> urls = new ArrayList<>(List.of("/events/" + eventFullDto.getId()));
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
         LocalDateTime end = LocalDateTime.now();
 
         Integer views = statsClient.getStats(start, end, urls, true).size();

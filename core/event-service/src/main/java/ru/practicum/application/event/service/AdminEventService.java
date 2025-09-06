@@ -1,6 +1,5 @@
 package ru.practicum.application.event.service;
 
-
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;

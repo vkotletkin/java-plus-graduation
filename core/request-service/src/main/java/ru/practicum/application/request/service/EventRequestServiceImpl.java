@@ -6,25 +6,25 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.application.api.dto.enums.EventState;
-import ru.practicum.application.api.dto.event.EventFullDto;
-import ru.practicum.application.api.dto.request.EventRequestDto;
-import ru.practicum.application.api.dto.user.UserDto;
-import ru.practicum.application.api.exception.ConflictException;
-import ru.practicum.application.api.exception.NotFoundException;
-import ru.practicum.application.api.exception.ValidationException;
-import ru.practicum.application.event.client.EventClient;
 import ru.practicum.application.request.mapper.EventRequestMapper;
 import ru.practicum.application.request.model.EventRequest;
 import ru.practicum.application.request.repository.RequestRepository;
-import ru.practicum.application.user.client.UserClient;
+import ru.practicum.client.EventFeignClient;
+import ru.practicum.client.UserFeignClient;
+import ru.practicum.dto.enums.EventState;
+import ru.practicum.dto.event.EventFullDto;
+import ru.practicum.dto.request.EventRequestDto;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.application.api.dto.enums.EventRequestStatus.*;
+import static ru.practicum.dto.enums.EventRequestStatus.*;
 
 @Service
 @Slf4j
@@ -33,8 +33,8 @@ import static ru.practicum.application.api.dto.enums.EventRequestStatus.*;
 public class EventRequestServiceImpl implements EventRequestService {
 
     final RequestRepository requestRepository;
-    final UserClient userClient;
-    final EventClient eventClient;
+    final UserFeignClient userClient;
+    final EventFeignClient eventClient;
 
     final EventRequestMapper eventRequestMapper;
 

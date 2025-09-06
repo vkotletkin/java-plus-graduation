@@ -7,37 +7,32 @@ import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 
-
 import java.util.List;
 
 public interface RequestApi {
 
-    @PostMapping("/users/{userId}/requests")
+    String USERS_BY_ID_REQUESTS_PATH = "/users/{user-id}/requests";
+    String USERS_BY_ID_EVENTS_BY_ID_REQUESTS_PATH = "/users/{user-id}/events/{event-id}/requests";
+
+    @PostMapping(USERS_BY_ID_REQUESTS_PATH)
     @ResponseStatus(HttpStatus.CREATED)
-    EventRequestDto addEventRequest(
-            @PathVariable Long userId,
-            @RequestParam Long eventId
+    EventRequestDto addEventRequest(@PathVariable(name = "user-id") Long userId,
+                                    @RequestParam Long eventId
     ) throws ConflictException, NotFoundException;
 
-    @GetMapping("/users/{userId}/requests")
-    List<EventRequestDto> getUserRequests(@PathVariable Long userId) throws NotFoundException;
+    @GetMapping(USERS_BY_ID_REQUESTS_PATH)
+    List<EventRequestDto> getUserRequests(@PathVariable(name = "user-id") Long userId) throws NotFoundException;
 
-    @GetMapping("/users/{userId}/events/{eventId}/requests")
-    List<EventRequestDto> getRequestsByEventId(
-            @PathVariable Long userId,
-            @PathVariable Long eventId
-    ) throws ValidationException, NotFoundException;
+    @GetMapping(USERS_BY_ID_EVENTS_BY_ID_REQUESTS_PATH)
+    List<EventRequestDto> getRequestsByEventId(@PathVariable(name = "user-id") Long userId,
+                                               @PathVariable(name = "event-id") Long eventId) throws ValidationException, NotFoundException;
 
-    @PatchMapping("/users/{userId}/events/{eventId}/requests")
-    EventRequestDto updateRequest(
-            @PathVariable Long userId,
-            @PathVariable Long eventId,
-            @RequestBody EventRequestDto request
-    ) throws ValidationException, ConflictException, NotFoundException;
+    @PatchMapping(USERS_BY_ID_EVENTS_BY_ID_REQUESTS_PATH)
+    EventRequestDto updateRequest(@PathVariable(name = "user-id") Long userId,
+                                  @PathVariable(name = "event-id") Long eventId,
+                                  @RequestBody EventRequestDto request) throws ValidationException, ConflictException, NotFoundException;
 
-    @PatchMapping("/users/{userId}/requests/{requestId}/cancel")
-    EventRequestDto cancelRequest(
-            @PathVariable Long userId,
-            @PathVariable Long requestId
-    ) throws ValidationException, NotFoundException;
+    @PatchMapping(USERS_BY_ID_REQUESTS_PATH + "/{request-id}/cancel")
+    EventRequestDto cancelRequest(@PathVariable(name = "user-id") Long userId,
+                                  @PathVariable(name = "request-id") Long requestId) throws ValidationException, NotFoundException;
 }

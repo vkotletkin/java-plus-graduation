@@ -8,12 +8,15 @@ import ru.practicum.dto.request.EventRequestDto;
 import java.util.List;
 
 public interface InnerEventRequestApi {
-    @GetMapping("/inner/request/{eventId}/status/count")
-    Long countByEventAndStatuses(@PathVariable Long eventId, @RequestParam List<String> statuses);
 
-    @GetMapping("/inner/request/events/{status}")
-    List<EventRequestDto> getByEventAndStatus(@RequestParam List<Long> eventId, @PathVariable String status);
+    String INNER_REQUEST_PATH = "/inner/request";
 
-    @GetMapping("/inner/request/events")
+    @GetMapping(INNER_REQUEST_PATH + "/events/{status}")
+    List<EventRequestDto> getByEventAndStatus(@RequestParam List<Long> eventId, @PathVariable(name = "status") String status);
+
+    @GetMapping(INNER_REQUEST_PATH + "/events")
     List<EventRequestDto> findByEventIds(@RequestParam List<Long> id);
+
+    @GetMapping(INNER_REQUEST_PATH + "/{event-id}/status/count")
+    Long countByEventAndStatuses(@PathVariable(name = "event-id") Long eventId, @RequestParam List<String> statuses);
 }

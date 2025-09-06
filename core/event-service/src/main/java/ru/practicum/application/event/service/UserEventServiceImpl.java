@@ -6,14 +6,13 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
+import ru.practicum.application.event.mapper.EventMapper;
+import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
 import ru.practicum.application.event.repository.LocationRepository;
 import ru.practicum.client.CategoryFeignClient;
 import ru.practicum.client.RequestFeignClient;
 import ru.practicum.client.StatsClient;
-import ru.practicum.application.event.mapper.EventMapper;
-import ru.practicum.application.event.model.Event;
 import ru.practicum.client.UserFeignClient;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
@@ -27,7 +26,6 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.exception.WrongDataException;
 import ru.practicum.request.event.UpdateEventUserRequest;
-import ru.practicum.util.JsonFormatPattern;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -37,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ru.practicum.client.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Service
 @Slf4j
@@ -170,7 +169,7 @@ public class UserEventServiceImpl implements UserEventService {
         }
         if (inpEventDto.getEventDate() != null) {
             LocalDateTime updateEventDate = LocalDateTime.parse(inpEventDto.getEventDate(),
-                    DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+                    DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
             if (LocalDateTime.now().isAfter(updateEventDate)) {
                 throw new ValidationException("Нельзя установить дату из прошлого.");
             }
@@ -208,7 +207,7 @@ public class UserEventServiceImpl implements UserEventService {
 
     EventFullDto getViewsCounter(EventFullDto eventFullDto) {
         ArrayList<String> urls = new ArrayList<>(List.of("/events/" + eventFullDto.getId()));
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
         LocalDateTime end = LocalDateTime.now();
 
         Integer views = statsClient.getStats(start, end, urls, true).size();

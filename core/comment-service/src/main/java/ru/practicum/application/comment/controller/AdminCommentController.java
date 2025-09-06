@@ -3,13 +3,12 @@ package ru.practicum.application.comment.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.api.comment.AdminCommentApi;
 import ru.practicum.application.comment.service.CommentService;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.comment.GetCommentsAdminRequest;
-
 
 import java.util.Collection;
 
@@ -27,9 +26,8 @@ public class AdminCommentController implements AdminCommentApi {
     }
 
     @Override
-    public void removeComment(@PathVariable("commentId") Long commentId) throws NotFoundException {
+    public void removeComment(Long commentId) throws NotFoundException {
         log.info("удаление комментария с id {}", commentId);
         service.delete(commentId);
     }
-
 }

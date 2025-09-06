@@ -1,17 +1,15 @@
 package ru.practicum.application.user.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.application.api.dto.user.UserDto;
-import ru.practicum.application.api.exception.NotFoundException;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.application.user.service.UserService;
-import ru.practicum.application.user.api.InnerUserInterface;
+import ru.practicum.api.user.InnerUserApi;
 
 @RestController
 @RequiredArgsConstructor
-public class InnerUserController implements InnerUserInterface {
+public class InnerUserController implements InnerUserApi {
 
     private final UserService userService;
 

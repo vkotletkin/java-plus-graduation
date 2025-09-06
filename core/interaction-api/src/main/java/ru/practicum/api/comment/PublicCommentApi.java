@@ -2,7 +2,6 @@ package ru.practicum.api.comment;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +10,6 @@ import ru.practicum.exception.NotFoundException;
 
 import java.util.Collection;
 
-@Validated
 public interface PublicCommentApi {
 
     @GetMapping("/events/{event-id}/comments")

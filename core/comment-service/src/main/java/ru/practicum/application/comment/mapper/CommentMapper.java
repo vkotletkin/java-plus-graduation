@@ -1,10 +1,10 @@
 package ru.practicum.application.comment.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.application.comment.model.Comment;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.application.comment.model.Comment;
 
 import java.util.List;
 

@@ -4,10 +4,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.api.compilation.PublicCompilationApi;
-import ru.practicum.application.compilation.service.CompilationService;
 import ru.practicum.dto.compilation.ResponseCompilationDto;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.api.compilation.PublicCompilationApi;
+import ru.practicum.application.compilation.service.CompilationService;
 
 import java.util.List;
 
@@ -24,9 +24,7 @@ public class PublicCompilationController implements PublicCompilationApi {
     }
 
     @Override
-    public ResponseCompilationDto getCompilationById(Long compId) throws NotFoundException {
-        return compilationService.getCompilationById(compId);
+    public ResponseCompilationDto getCompilationById(Long compilationId) throws NotFoundException {
+        return compilationService.getCompilationById(compilationId);
     }
-
-
 }

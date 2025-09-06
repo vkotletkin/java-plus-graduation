@@ -1,6 +1,5 @@
 package ru.practicum.application.category.service;
 
-
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface CategoryService {
-
     CategoryDto addCategory(CategoryDto categoryDto) throws ConflictException;
 
     CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws NotFoundException, ConflictException;

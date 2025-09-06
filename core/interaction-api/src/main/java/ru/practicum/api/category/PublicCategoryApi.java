@@ -1,6 +1,5 @@
 package ru.practicum.api.category;
 
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,7 +8,6 @@ import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
 
-@Validated
 public interface PublicCategoryApi {
 
     String CATEGORIES_PATH = "/categories";
@@ -19,5 +17,5 @@ public interface PublicCategoryApi {
                                        @RequestParam(defaultValue = "10") Integer size);
 
     @GetMapping(CATEGORIES_PATH + "/{category-id}")
-    CategoryDto getCategoryById(@PathVariable(name = "category-id") Long catId) throws NotFoundException;
+    CategoryDto getCategoryById(@PathVariable(name = "category-id") Long categoryId) throws NotFoundException;
 }

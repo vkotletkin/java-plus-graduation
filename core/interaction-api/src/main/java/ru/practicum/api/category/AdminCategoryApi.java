@@ -2,13 +2,11 @@ package ru.practicum.api.category;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
-@Validated
 public interface AdminCategoryApi {
 
     String ADMIN_CATEGORIES_PATH = "/admin/categories";

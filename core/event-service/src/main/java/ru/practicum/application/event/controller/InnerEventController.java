@@ -5,12 +5,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.api.event.InnerEventApi;
-import ru.practicum.application.event.service.InnerEventService;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.exception.NotFoundException;
-
+import ru.practicum.application.event.service.InnerEventService;
+import ru.practicum.api.event.InnerEventApi;
 
 import java.util.List;
 

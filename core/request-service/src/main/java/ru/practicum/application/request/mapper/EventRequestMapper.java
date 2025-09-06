@@ -2,13 +2,13 @@ package ru.practicum.application.request.mapper;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.application.api.dto.request.EventRequestDto;
+import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.application.request.model.EventRequest;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static ru.practicum.application.api.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
+import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 
 @Component

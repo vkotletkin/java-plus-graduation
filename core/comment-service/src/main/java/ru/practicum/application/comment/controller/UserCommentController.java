@@ -1,15 +1,15 @@
 package ru.practicum.application.comment.controller;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.api.comment.UserCommentApi;
 import ru.practicum.application.comment.service.CommentService;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-
 
 import java.util.Collection;
 
@@ -27,7 +27,7 @@ public class UserCommentController implements UserCommentApi {
     }
 
     @Override
-    public void deleteComment(Long commentId, Long userId) throws ConflictException, NotFoundException {
+    public void deleteComment(@NonNull Long commentId, @NonNull Long userId) throws ConflictException, NotFoundException {
         service.delete(userId, commentId);
     }
 

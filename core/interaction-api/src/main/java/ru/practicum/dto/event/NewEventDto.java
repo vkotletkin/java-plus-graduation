@@ -6,7 +6,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.util.JsonFormatPattern;
+
+import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Getter
 @Setter
@@ -24,7 +25,7 @@ public class NewEventDto {
     @NotBlank
     @Size(min = 20)
     String description;
-    @JsonFormat(pattern = JsonFormatPattern.TIME_PATTERN)
+    @JsonFormat(pattern = JSON_FORMAT_PATTERN_FOR_TIME)
     String eventDate;
     LocationDto location;
     Boolean paid;

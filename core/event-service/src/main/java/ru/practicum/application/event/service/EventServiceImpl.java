@@ -23,13 +23,13 @@ import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.util.JsonFormatPattern;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.practicum.client.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Service
 @Slf4j
@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService {
         );
 
         List<String> urls = Collections.singletonList(uri);
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
         LocalDateTime end = LocalDateTime.now();
         var views = statsClient.getStats(start, end, urls, true).size();
         eventFullDto.setViews(views);
@@ -94,7 +94,7 @@ public class EventServiceImpl implements EventService {
                         PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "e.eventDate")));
             } else {
                 startDate = (rangeStart == null) ? LocalDateTime.now() :
-                        LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+                        LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
                 if (text == null) {
                     text = "";
                 }
@@ -102,7 +102,7 @@ public class EventServiceImpl implements EventService {
                     events = eventRepository.findEventsByText("%" + text.toLowerCase() + "%", EventState.PUBLISHED,
                             PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "e.eventDate")));
                 } else {
-                    endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+                    endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
                     if (startDate.isAfter(endDate)) {
                         throw new ValidationException("Дата и время начала поиска не должна быть позже даты и времени конца поиска");
                     }
@@ -116,12 +116,12 @@ public class EventServiceImpl implements EventService {
             }
         } else {
             startDate = (rangeStart == null) ? LocalDateTime.now() :
-                    LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+                    LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
 
             if (rangeEnd == null) {
                 endDate = null;
             } else {
-                endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+                endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
             }
             if (rangeStart != null && rangeEnd != null) {
                 if (startDate.isAfter(endDate)) {

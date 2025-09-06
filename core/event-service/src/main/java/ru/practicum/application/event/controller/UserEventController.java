@@ -4,8 +4,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.api.event.UserEventApi;
-import ru.practicum.application.event.service.UserEventService;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
@@ -14,7 +12,8 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.exception.WrongDataException;
 import ru.practicum.request.event.UpdateEventUserRequest;
-
+import ru.practicum.application.event.service.UserEventService;
+import ru.practicum.api.event.UserEventApi;
 
 import java.util.List;
 

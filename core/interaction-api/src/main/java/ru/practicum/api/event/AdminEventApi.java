@@ -21,14 +21,13 @@ public interface AdminEventApi {
     String ADMIN_EVENTS_PATH = "/admin/events";
 
     @GetMapping(ADMIN_EVENTS_PATH)
-    List<EventFullDto> getEvents(
-            @RequestParam(required = false) List<Long> users,
-            @RequestParam(required = false) List<String> states,
-            @RequestParam(required = false) List<Long> categories,
-            @DateTimeFormat(pattern = JsonFormatPattern.TIME_PATTERN) @RequestParam(required = false) LocalDateTime rangeStart,
-            @DateTimeFormat(pattern = JsonFormatPattern.TIME_PATTERN) @RequestParam(required = false) LocalDateTime rangeEnd,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) throws ValidationException;
+    List<EventFullDto> getEvents(@RequestParam(required = false) List<Long> users,
+                                 @RequestParam(required = false) List<String> states,
+                                 @RequestParam(required = false) List<Long> categories,
+                                 @DateTimeFormat(pattern = JsonFormatPattern.TIME_PATTERN) @RequestParam(required = false) LocalDateTime rangeStart,
+                                 @DateTimeFormat(pattern = JsonFormatPattern.TIME_PATTERN) @RequestParam(required = false) LocalDateTime rangeEnd,
+                                 @RequestParam(defaultValue = "0") Integer from,
+                                 @RequestParam(defaultValue = "10") Integer size) throws ValidationException;
 
     @PatchMapping(ADMIN_EVENTS_PATH + "/{event-id}")
     EventFullDto updateEvent(@PathVariable(name = "event-id") Long eventId,

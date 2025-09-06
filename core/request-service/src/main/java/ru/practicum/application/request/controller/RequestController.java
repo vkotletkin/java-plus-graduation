@@ -4,19 +4,19 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.application.api.dto.request.EventRequestDto;
-import ru.practicum.application.api.exception.ConflictException;
-import ru.practicum.application.api.exception.NotFoundException;
-import ru.practicum.application.api.exception.ValidationException;
+import ru.practicum.dto.request.EventRequestDto;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.application.request.service.EventRequestService;
-import ru.practicum.application.request.api.EventRequestInterface;
+import ru.practicum.api.request.RequestApi;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RequestController implements EventRequestInterface {
+public class RequestController implements RequestApi {
 
     final EventRequestService requestService;
 

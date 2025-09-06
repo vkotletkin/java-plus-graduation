@@ -5,17 +5,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.application.api.dto.user.UserDto;
-import ru.practicum.application.api.exception.ConflictException;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.application.user.service.UserService;
-import ru.practicum.application.user.api.UserInterface;
+import ru.practicum.api.user.UserApi;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserController implements UserInterface {
+public class UserController implements UserApi {
 
     final UserService userService;
 

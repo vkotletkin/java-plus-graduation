@@ -1,9 +1,9 @@
 package ru.practicum.application.user.service;
 
 import org.springframework.data.domain.Pageable;
-import ru.practicum.application.api.dto.user.UserDto;
-import ru.practicum.application.api.exception.ConflictException;
-import ru.practicum.application.api.exception.NotFoundException;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
 

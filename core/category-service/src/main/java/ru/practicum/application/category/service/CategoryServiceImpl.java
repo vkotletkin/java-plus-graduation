@@ -1,7 +1,8 @@
 package ru.practicum.application.category.service;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -14,18 +15,18 @@ import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryRepository categoryRepository;
-    private final EventFeignClient eventClient;
+    final CategoryRepository categoryRepository;
+    final EventFeignClient eventClient;
 
     @Override
     @Transactional

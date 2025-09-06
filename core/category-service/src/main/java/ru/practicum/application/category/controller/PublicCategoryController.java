@@ -17,6 +17,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class PublicCategoryController implements PublicCategoryApi {
+
     final CategoryService categoryService;
 
     @Override
@@ -26,7 +27,7 @@ public class PublicCategoryController implements PublicCategoryApi {
     }
 
     @Override
-    public CategoryDto getCategoryById(@PathVariable Long catId) throws NotFoundException {
-        return categoryService.getCategoryById(catId);
+    public CategoryDto getCategoryById(Long categoryId) throws NotFoundException {
+        return categoryService.getCategoryById(categoryId);
     }
 }

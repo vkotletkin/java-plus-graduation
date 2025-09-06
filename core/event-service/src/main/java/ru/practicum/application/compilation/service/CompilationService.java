@@ -1,6 +1,5 @@
 package ru.practicum.application.compilation.service;
 
-
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.dto.compilation.ResponseCompilationDto;
 import ru.practicum.exception.NotFoundException;

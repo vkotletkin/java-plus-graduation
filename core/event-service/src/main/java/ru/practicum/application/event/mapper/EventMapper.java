@@ -1,8 +1,6 @@
 package ru.practicum.application.event.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.application.event.model.Event;
-import ru.practicum.application.event.model.Location;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.dto.event.EventFullDto;
@@ -10,11 +8,13 @@ import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.LocationDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.user.UserDto;
-import ru.practicum.util.JsonFormatPattern;
+import ru.practicum.application.event.model.Event;
+import ru.practicum.application.event.model.Location;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @UtilityClass
 public class EventMapper {
@@ -76,13 +76,13 @@ public class EventMapper {
         if (time == null) {
             return null;
         }
-        return time.format(DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+        return time.format(DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
     }
 
     static LocalDateTime getFromString(String time) {
         if (time == null) {
             return null;
         }
-        return LocalDateTime.parse(time, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+        return LocalDateTime.parse(time, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
     }
 }
