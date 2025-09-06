@@ -36,8 +36,6 @@ public class EventRequestServiceImpl implements EventRequestService {
     final UserFeignClient userClient;
     final EventFeignClient eventClient;
 
-    final EventRequestMapper eventRequestMapper;
-
     @Override
     @Transactional
     public EventRequestDto addRequest(Long userId, Long eventId) throws ConflictException, NotFoundException {
@@ -60,7 +58,7 @@ public class EventRequestServiceImpl implements EventRequestService {
 
         EventRequest newRequest = createNewEventRequest(user, event);
         EventRequest eventRequest = requestRepository.save(newRequest);
-        return eventRequestMapper.mapRequest(eventRequest);
+        return EventRequestMapper.mapRequest(eventRequest);
     }
 
     @Override
@@ -69,7 +67,7 @@ public class EventRequestServiceImpl implements EventRequestService {
             throw new NotFoundException("Пользователь не найден userId=" + userId);
         }
         return requestRepository.findByUserId(userId).stream()
-                .map(eventRequestMapper::mapRequest)
+                .map(EventRequestMapper::mapRequest)
                 .collect(Collectors.toList());
     }
 
@@ -77,7 +75,7 @@ public class EventRequestServiceImpl implements EventRequestService {
     public List<EventRequestDto> getRequestsByEventId(Long userId, Long eventId) throws ValidationException, NotFoundException {
         List<EventRequest> requests = getEventRequests(userId, eventId);
         return requests.stream()
-                .map(eventRequestMapper::mapRequest)
+                .map(EventRequestMapper::mapRequest)
                 .collect(Collectors.toList());
     }
 
@@ -118,7 +116,7 @@ public class EventRequestServiceImpl implements EventRequestService {
                 }
 
                 request.setStatus(updateRequest.getStatus());
-                EventRequestDto participationRequestDto = eventRequestMapper.mapRequest(request);
+                EventRequestDto participationRequestDto = EventRequestMapper.mapRequest(request);
 
                 if (CONFIRMED_REQUEST.equals(participationRequestDto.getStatus())) {
                     confirmedRequests.add(participationRequestDto);
@@ -138,7 +136,7 @@ public class EventRequestServiceImpl implements EventRequestService {
 
         requestRepository.saveAll(result);
 
-        return eventRequestMapper.mapRequestWithConfirmedAndRejected(confirmedRequests, rejectedRequests);
+        return EventRequestMapper.mapRequestWithConfirmedAndRejected(confirmedRequests, rejectedRequests);
     }
 
     @Override
@@ -156,7 +154,7 @@ public class EventRequestServiceImpl implements EventRequestService {
             throw new ValidationException("Создатель заявки не userId=" + userId);
         }
         request.setStatus(CANCELED_REQUEST);
-        return eventRequestMapper.mapRequest(requestRepository.save(request));
+        return EventRequestMapper.mapRequest(requestRepository.save(request));
     }
 
     @Override
@@ -167,14 +165,14 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Override
     public List<EventRequestDto> getByEventAndStatus(List<Long> eventId, String status) {
         return requestRepository.findByEventIdsAndStatus(eventId, status).stream()
-                .map(eventRequestMapper::mapRequest)
+                .map(EventRequestMapper::mapRequest)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<EventRequestDto> findByEventIds(List<Long> id) {
         return requestRepository.findByEventIds(id).stream()
-                .map(eventRequestMapper::mapRequest)
+                .map(EventRequestMapper::mapRequest)
                 .collect(Collectors.toList());
     }
 
