@@ -13,10 +13,9 @@ import ru.practicum.exception.NotFoundException;
 
 import java.util.Collection;
 
-@RequiredArgsConstructor
-@RestController
-@Slf4j
 @Validated
+@RestController
+@RequiredArgsConstructor
 public class UserCommentController implements UserCommentApi {
 
     private final CommentService service;

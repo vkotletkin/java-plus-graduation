@@ -9,14 +9,13 @@ import ru.practicum.util.JsonFormatPattern;
 import java.time.LocalDateTime;
 
 
+@Data
 @Entity
-@Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "comment")
 @EqualsAndHashCode(of = "id")
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Comment {
 

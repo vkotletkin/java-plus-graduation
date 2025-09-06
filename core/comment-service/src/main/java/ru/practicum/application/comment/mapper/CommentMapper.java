@@ -1,17 +1,18 @@
 package ru.practicum.application.comment.mapper;
 
-import lombok.experimental.UtilityClass;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import ru.practicum.application.comment.model.Comment;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.user.UserDto;
-import ru.practicum.application.comment.model.Comment;
 
 import java.util.List;
 
-@UtilityClass
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {
 
-    public CommentDto mapToCommentDto(final Comment comment) {
+    public static CommentDto toDto(final Comment comment) {
         return CommentDto.builder()
                 .id(comment.getId())
                 .userId(comment.getUser())
@@ -22,16 +23,17 @@ public class CommentMapper {
                 .build();
     }
 
-    public List<CommentDto> mapToCommentDto(final List<Comment> comments) {
+    public static List<CommentDto> toDto(final List<Comment> comments) {
+
         if (comments == null || comments.isEmpty()) {
             return List.of();
         }
         return comments.stream()
-                .map(CommentMapper::mapToCommentDto)
+                .map(CommentMapper::toDto)
                 .toList();
     }
 
-    public Comment mapTo(final CommentDto comment, final UserDto user, final EventFullDto event) {
+    public static Comment toModel(final CommentDto comment, final UserDto user, final EventFullDto event) {
         return Comment.builder()
                 .id(comment.getId())
                 .user(user.getId())
