@@ -14,6 +14,7 @@ import ru.practicum.client.CategoryFeignClient;
 import ru.practicum.client.RequestFeignClient;
 import ru.practicum.client.StatsClient;
 import ru.practicum.client.UserFeignClient;
+import ru.practicum.client.util.JsonFormatPattern;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.dto.enums.StateAction;
@@ -35,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ru.practicum.client.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Service
 @Slf4j
@@ -169,7 +169,7 @@ public class UserEventServiceImpl implements UserEventService {
         }
         if (inpEventDto.getEventDate() != null) {
             LocalDateTime updateEventDate = LocalDateTime.parse(inpEventDto.getEventDate(),
-                    DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                    DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
             if (LocalDateTime.now().isAfter(updateEventDate)) {
                 throw new ValidationException("Нельзя установить дату из прошлого.");
             }
@@ -207,7 +207,7 @@ public class UserEventServiceImpl implements UserEventService {
 
     EventFullDto getViewsCounter(EventFullDto eventFullDto) {
         ArrayList<String> urls = new ArrayList<>(List.of("/events/" + eventFullDto.getId()));
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
         LocalDateTime end = LocalDateTime.now();
 
         Integer views = statsClient.getStats(start, end, urls, true).size();

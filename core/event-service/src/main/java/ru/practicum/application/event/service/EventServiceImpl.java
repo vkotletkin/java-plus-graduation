@@ -14,6 +14,7 @@ import ru.practicum.client.CategoryFeignClient;
 import ru.practicum.client.RequestFeignClient;
 import ru.practicum.client.StatsClient;
 import ru.practicum.client.UserFeignClient;
+import ru.practicum.client.util.JsonFormatPattern;
 import ru.practicum.dto.StatsRequestDto;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
@@ -29,7 +30,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.practicum.client.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Service
 @Slf4j
@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService {
         );
 
         List<String> urls = Collections.singletonList(uri);
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
         LocalDateTime end = LocalDateTime.now();
         var views = statsClient.getStats(start, end, urls, true).size();
         eventFullDto.setViews(views);
@@ -94,7 +94,7 @@ public class EventServiceImpl implements EventService {
                         PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "e.eventDate")));
             } else {
                 startDate = (rangeStart == null) ? LocalDateTime.now() :
-                        LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                        LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
                 if (text == null) {
                     text = "";
                 }
@@ -102,7 +102,7 @@ public class EventServiceImpl implements EventService {
                     events = eventRepository.findEventsByText("%" + text.toLowerCase() + "%", EventState.PUBLISHED,
                             PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "e.eventDate")));
                 } else {
-                    endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                    endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
                     if (startDate.isAfter(endDate)) {
                         throw new ValidationException("Дата и время начала поиска не должна быть позже даты и времени конца поиска");
                     }
@@ -116,12 +116,12 @@ public class EventServiceImpl implements EventService {
             }
         } else {
             startDate = (rangeStart == null) ? LocalDateTime.now() :
-                    LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                    LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
 
             if (rangeEnd == null) {
                 endDate = null;
             } else {
-                endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JSON_FORMAT_PATTERN_FOR_TIME));
+                endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
             }
             if (rangeStart != null && rangeEnd != null) {
                 if (startDate.isAfter(endDate)) {
