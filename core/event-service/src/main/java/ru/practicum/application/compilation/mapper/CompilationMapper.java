@@ -8,11 +8,11 @@ import ru.practicum.dto.compilation.ResponseCompilationDto;
 @UtilityClass
 public class CompilationMapper {
 
-    public static Compilation mapToCompilation(NewCompilationDto dto) {
+    public static Compilation toModel(NewCompilationDto dto) {
         return Compilation.builder().title(dto.getTitle()).pinned(dto.getPinned()).build();
     }
 
-    public static ResponseCompilationDto mapToResponseCompilation(Compilation compilation) {
+    public static ResponseCompilationDto toResponseCompilationDto(Compilation compilation) {
         return ResponseCompilationDto.builder()
                 .id(compilation.getId())
                 .pinned(compilation.getPinned())
