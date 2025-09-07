@@ -1,9 +1,8 @@
 package ru.practicum.application.event.service.impl;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.application.event.mapper.EventMapper;
 import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
@@ -21,22 +20,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ru.practicum.exception.NotFoundException.notFoundException;
+
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Transactional
 public class InnerEventServiceImpl implements InnerEventService {
-    final EventRepository eventRepository;
 
-    final UserFeignClient userClient;
-    final CategoryFeignClient categoryClient;
+    private static final String NOT_FOUND_EVENT_MESSAGE = "Событие с ID: {0} - не найдено";
+
+    private final EventRepository eventRepository;
+
+    private final UserFeignClient userFeignClient;
+    private final CategoryFeignClient categoryFeignClient;
 
     @Override
     public EventFullDto getEventById(Long eventId) throws NotFoundException {
         Event event = eventRepository.findById(eventId).orElseThrow(
-                () -> new NotFoundException("Не найдено событие " + eventId)
-        );
-        return EventMapper.mapEventToFullDto(event, null, categoryClient.getCategoryById(event.getCategory()),
-                userClient.getById(event.getInitiator()));
+                notFoundException(NOT_FOUND_EVENT_MESSAGE, eventId));
+
+        return EventMapper.mapEventToFullDto(event, null,
+                categoryFeignClient.getCategoryById(event.getCategory()),
+                userFeignClient.getById(event.getInitiator()));
     }
 
     @Override
@@ -51,16 +56,19 @@ public class InnerEventServiceImpl implements InnerEventService {
 
     @Override
     public List<EventShortDto> getShortByIds(List<Long> ids) {
+
         List<Event> events = eventRepository.findAllById(ids);
         List<Long> usersIds = events.stream().map(Event::getInitiator).toList();
+
         Set<Long> categoriesIds = events.stream().map(Event::getCategory).collect(Collectors.toSet());
-        Map<Long, UserDto> users = userClient.getUsersList(usersIds, 0, Math.max(events.size(), 1)).stream()
+
+        Map<Long, UserDto> users = userFeignClient.getUsersList(usersIds, 0, Math.max(events.size(), 1)).stream()
                 .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
-        Map<Long, CategoryDto> categories = categoryClient.getCategoriesByIds(categoriesIds).stream()
+
+        Map<Long, CategoryDto> categories = categoryFeignClient.getCategoriesByIds(categoriesIds).stream()
                 .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));
 
         return events.stream().map(
-                e -> EventMapper.mapEventToShortDto(e, categories.get(e.getCategory()), users.get(e.getInitiator()))
-        ).collect(Collectors.toList());
+                e -> EventMapper.mapEventToShortDto(e, categories.get(e.getCategory()), users.get(e.getInitiator()))).toList();
     }
 }
