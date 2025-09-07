@@ -7,10 +7,11 @@ import ru.practicum.application.event.model.Event;
 
 import java.util.List;
 
-@Entity
-@Table(name = "compilations")
 @Getter
 @Setter
+@Entity
+@Table(name = "compilations")
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
