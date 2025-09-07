@@ -1,5 +1,6 @@
 package ru.practicum.dto.event;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -17,9 +18,11 @@ public class EventFullDto {
 
     Long id;
 
+    @NotBlank
     @Size(min = 1, max = 128)
     String title;
 
+    @NotBlank
     @Size(min = 1, max = 1024)
     String annotation;
 
@@ -28,6 +31,7 @@ public class EventFullDto {
     String eventDate;
     UserDto initiator;
 
+    @NotBlank
     @Size(min = 1, max = 1024)
     String description;
 

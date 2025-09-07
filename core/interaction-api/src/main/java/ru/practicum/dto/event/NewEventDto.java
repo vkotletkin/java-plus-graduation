@@ -21,6 +21,7 @@ public class NewEventDto {
 
     Long category;
 
+    @NotBlank
     @Size(min = 3, max = 120)
     String title;
 
