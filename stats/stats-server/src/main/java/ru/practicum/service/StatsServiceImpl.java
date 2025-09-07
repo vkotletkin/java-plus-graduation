@@ -1,15 +1,13 @@
 package ru.practicum.service;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.StatsRequestDto;
 import ru.practicum.dto.StatsResponseDto;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.mapper.Mapper;
+import ru.practicum.model.Requests;
 import ru.practicum.model.Response;
 import ru.practicum.repository.StatsRepository;
 
@@ -18,18 +16,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@Slf4j
+@RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
 
-    final StatsRepository statsRepository;
+    private final StatsRepository statsRepository;
 
     @Transactional
     public StatsRequestDto save(StatsRequestDto requestDto) {
-        log.info("Save request to {}", requestDto);
         try {
-            var savedRequest = statsRepository.save(Mapper.toRequest(requestDto));
+            Requests savedRequest = statsRepository.save(Mapper.toRequest(requestDto));
             return Mapper.toRequestDto(savedRequest);
         } catch (Exception e) {
             throw new ValidationException(e.getMessage());
@@ -37,6 +32,7 @@ public class StatsServiceImpl implements StatsService {
     }
 
     public List<StatsResponseDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+
         if (start.isAfter(end)) {
             throw new ValidationException("Время окончания позже начала");
         }

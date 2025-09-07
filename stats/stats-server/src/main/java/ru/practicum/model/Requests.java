@@ -1,25 +1,23 @@
 package ru.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.practicum.util.JsonFormatPattern;
 
 import java.time.LocalDateTime;
-
-import static ru.practicum.util.JsonFormatPattern.JSON_FORMAT_PATTERN_FOR_TIME;
 
 @Entity
 @Table(name = "hits")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Requests {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -34,7 +32,7 @@ public class Requests {
     @Column(nullable = false)
     String ip;
 
-    @DateTimeFormat(pattern = JSON_FORMAT_PATTERN_FOR_TIME)
+    @DateTimeFormat(pattern = JsonFormatPattern.TIME_PATTERN)
     @Column(nullable = false)
     LocalDateTime moment;
 }
