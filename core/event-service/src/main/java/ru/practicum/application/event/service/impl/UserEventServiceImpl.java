@@ -1,4 +1,4 @@
-package ru.practicum.application.event.service;
+package ru.practicum.application.event.service.impl;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,7 @@ import ru.practicum.application.event.mapper.EventMapper;
 import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
 import ru.practicum.application.event.repository.LocationRepository;
+import ru.practicum.application.event.service.UserEventService;
 import ru.practicum.client.CategoryFeignClient;
 import ru.practicum.client.RequestFeignClient;
 import ru.practicum.client.StatsClient;

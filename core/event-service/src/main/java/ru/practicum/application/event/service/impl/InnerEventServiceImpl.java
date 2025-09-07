@@ -1,4 +1,4 @@
-package ru.practicum.application.event.service;
+package ru.practicum.application.event.service.impl;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.application.event.mapper.EventMapper;
 import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
+import ru.practicum.application.event.service.InnerEventService;
 import ru.practicum.client.CategoryFeignClient;
 import ru.practicum.client.UserFeignClient;
 import ru.practicum.dto.category.CategoryDto;

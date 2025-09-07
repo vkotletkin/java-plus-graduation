@@ -3,15 +3,16 @@ package ru.practicum.application.event.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.dto.enums.EventState;
 import ru.practicum.application.compilation.model.Compilation;
+import ru.practicum.dto.enums.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "events")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

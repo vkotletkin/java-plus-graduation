@@ -4,38 +4,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.application.event.model.Event;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findAllByIdIn(List<Long> ids);
 
-    List<Event> findAllByCategory(Long catId);
-
     Page<Event> findAll(Pageable page);
 
     List<Event> findAllByInitiator(Long user, Pageable page);
-
-    @Query(value = "SELECT e FROM Event e " +
-            "WHERE e.initiator IN :users " +
-            "AND e.state IN :states " +
-            "AND e.category IN :categories " +
-            "AND e.eventDate < :rangeStart " +
-            "LIMIT :limitSize", nativeQuery = true)
-    List<Event> findByParametersWithoutEnd(List<Long> users, List<String> states, List<Long> categories, String rangeStart, Integer limitSize);
-
-    @Query(value = "SELECT e FROM Event e " +
-            "WHERE e.initiator IN :users " +
-            "AND e.state IN :states " +
-            "AND e.category IN :categories " +
-            "AND e.eventDate < :rangeStart " +
-            "AND e.eventDate > :rangeEnd " +
-            "LIMIT :limitSize", nativeQuery = true)
-    List<Event> findByParametersWithEnd(List<Long> users, List<String> states, List<Long> categories, String rangeStart, String rangeEnd, Integer limitSize);
 
     @Query("SELECT e FROM Event e WHERE e.initiator IN :users " +
             "AND e.state in :states " +
