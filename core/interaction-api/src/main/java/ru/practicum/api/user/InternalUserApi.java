@@ -9,11 +9,11 @@ import ru.practicum.exception.NotFoundException;
 @Validated
 public interface InternalUserApi {
 
-    String INNER_USER_BY_ID_PATH = "/internal/user/{user-id}";
+    String INTERNAL_USER_BY_ID_PATH = "/internal/user/{user-id}";
 
-    @GetMapping(INNER_USER_BY_ID_PATH)
+    @GetMapping(INTERNAL_USER_BY_ID_PATH)
     UserDto getById(@PathVariable(name = "user-id") Long userId) throws NotFoundException;
 
-    @GetMapping(INNER_USER_BY_ID_PATH + "/exist")
+    @GetMapping(INTERNAL_USER_BY_ID_PATH + "/exist")
     boolean existsById(@PathVariable(name = "user-id") Long userId);
 }

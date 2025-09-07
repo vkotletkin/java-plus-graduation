@@ -13,17 +13,17 @@ import java.util.List;
 @Validated
 public interface InternalEventApi {
 
-    String INNER_EVENT_PATH = "/internal/event";
+    String INTERNAL_EVENT_PATH = "/internal/event";
 
-    @GetMapping(INNER_EVENT_PATH + "/short/ids")
+    @GetMapping(INTERNAL_EVENT_PATH + "/short/ids")
     List<EventShortDto> getShortByIds(@RequestParam List<Long> ids);
 
-    @GetMapping(INNER_EVENT_PATH + "/{event-id}")
+    @GetMapping(INTERNAL_EVENT_PATH + "/{event-id}")
     EventFullDto getInnerEventById(@PathVariable(name = "event-id") Long eventId) throws NotFoundException;
 
-    @GetMapping(INNER_EVENT_PATH + "/{event-id}/exist")
+    @GetMapping(INTERNAL_EVENT_PATH + "/{event-id}/exist")
     boolean existsById(@PathVariable(name = "event-id") Long eventId);
 
-    @GetMapping(INNER_EVENT_PATH + "/category/{category-id}/exist")
+    @GetMapping(INTERNAL_EVENT_PATH + "/category/{category-id}/exist")
     boolean existsByCategoryId(@PathVariable(name = "category-id") Long categoryId);
 }

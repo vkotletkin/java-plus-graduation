@@ -12,11 +12,11 @@ import java.util.Set;
 @Validated
 public interface InternalCategoryApi {
 
-    String INNER_CATEGORY_PATH = "/internal/category";
+    String INTERNAL_CATEGORY_PATH = "/internal/category";
 
-    @GetMapping(INNER_CATEGORY_PATH + "/all")
+    @GetMapping(INTERNAL_CATEGORY_PATH + "/all")
     List<CategoryDto> getCategoriesByIds(@RequestParam Set<Long> ids);
 
-    @GetMapping(INNER_CATEGORY_PATH + "/exist/{category-id}")
+    @GetMapping(INTERNAL_CATEGORY_PATH + "/exist/{category-id}")
     boolean existById(@PathVariable(name = "category-id") Long categoryId);
 }
