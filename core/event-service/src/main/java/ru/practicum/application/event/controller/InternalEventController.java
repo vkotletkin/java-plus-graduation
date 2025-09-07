@@ -1,24 +1,23 @@
 package ru.practicum.application.event.controller;
 
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.api.event.InternalEventApi;
+import ru.practicum.application.event.service.InnerEventService;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.application.event.service.InnerEventService;
-import ru.practicum.api.event.InternalEventApi;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class InternalEventController implements InternalEventApi {
 
-    final InnerEventService innerEventService;
+    private final InnerEventService innerEventService;
 
     @Override
     public EventFullDto getInnerEventById(Long eventId) throws NotFoundException {

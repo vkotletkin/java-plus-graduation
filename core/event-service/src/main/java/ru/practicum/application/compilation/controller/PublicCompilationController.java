@@ -1,22 +1,21 @@
 package ru.practicum.application.compilation.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
-import ru.practicum.dto.compilation.ResponseCompilationDto;
-import ru.practicum.exception.NotFoundException;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.api.compilation.PublicCompilationApi;
 import ru.practicum.application.compilation.service.CompilationService;
+import ru.practicum.dto.compilation.ResponseCompilationDto;
+import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PublicCompilationController implements PublicCompilationApi {
 
-    final CompilationService compilationService;
+    private final CompilationService compilationService;
 
     @Override
     public List<ResponseCompilationDto> getAll(Boolean pinned, Integer from, Integer size) {

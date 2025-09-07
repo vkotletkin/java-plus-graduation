@@ -1,8 +1,7 @@
 package ru.practicum.application.event.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.api.event.AdminEventApi;
 import ru.practicum.application.event.service.AdminEventService;
@@ -16,12 +15,12 @@ import ru.practicum.request.event.UpdateEventAdminRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminEventController implements AdminEventApi {
 
-    final AdminEventService eventService;
+    private final AdminEventService eventService;
 
     @Override
     public List<EventFullDto> getEvents(List<Long> users,

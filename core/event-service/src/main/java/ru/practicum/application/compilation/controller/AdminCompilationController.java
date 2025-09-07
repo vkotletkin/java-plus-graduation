@@ -1,8 +1,7 @@
 package ru.practicum.application.compilation.controller;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.api.compilation.AdminCompilationApi;
 import ru.practicum.application.compilation.service.CompilationService;
@@ -12,12 +11,12 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.request.compilation.UpdateCompilationRequest;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminCompilationController implements AdminCompilationApi {
 
-    final CompilationService compilationService;
+    private final CompilationService compilationService;
 
     @Override
     public ResponseCompilationDto add(NewCompilationDto compilationDto) throws NotFoundException {
