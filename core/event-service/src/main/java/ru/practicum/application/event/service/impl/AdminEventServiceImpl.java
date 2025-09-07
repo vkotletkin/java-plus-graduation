@@ -165,7 +165,7 @@ public class AdminEventServiceImpl implements AdminEventService {
     @Override
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest updateRequest) throws ConflictException, ValidationException, NotFoundException, WrongDataException {
 
-        Event event = eventRepository.findById(eventId).orElseThrow(notFoundException("Событие не существует. ID события: {0}", eventId));
+        Event event = eventRepository.findById(eventId).orElseThrow(notFoundException("Событие не существует. Идентификатор события: {0}", eventId));
 
         if (LocalDateTime.now().isAfter(event.getEventDate().minus(2, ChronoUnit.HOURS))) {
             throw new ConflictException("До начала события меньше часа, изменение события невозможно");
@@ -205,7 +205,7 @@ public class AdminEventServiceImpl implements AdminEventService {
 
         if (updateRequest.getCategory() != null) {
             if (!categoryFeignClient.existById(updateRequest.getCategory())) {
-                throw new NotFoundException("Категория не найдена. ID категории: {0}", updateRequest.getCategory());
+                throw new NotFoundException("Категория не найдена. Идентификатор категории: {0}", updateRequest.getCategory());
             }
             event.setCategory(updateRequest.getCategory());
         }

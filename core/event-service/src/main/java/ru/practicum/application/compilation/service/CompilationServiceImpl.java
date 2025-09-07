@@ -116,7 +116,7 @@ public class CompilationServiceImpl implements CompilationService {
     public void deleteCompilation(Long id) throws ValidationException, NotFoundException {
 
         Compilation compilation = compilationRepository.findById(id)
-                .orElseThrow(notFoundException("Категория с ID: {0} - не найдена", id));
+                .orElseThrow(notFoundException("Категория с идентификатором: {0} - не найдена", id));
 
         try {
             compilationRepository.delete(compilation);

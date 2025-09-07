@@ -27,7 +27,7 @@ import static ru.practicum.exception.NotFoundException.notFoundException;
 @Transactional
 public class InnerEventServiceImpl implements InnerEventService {
 
-    private static final String NOT_FOUND_EVENT_MESSAGE = "Событие с ID: {0} - не найдено";
+    private static final String NOT_FOUND_EVENT_MESSAGE = "Событие с идентификатором: {0} - не найдено";
 
     private final EventRepository eventRepository;
 

@@ -19,7 +19,6 @@ import ru.practicum.exception.ValidationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.practicum.dto.enums.EventRequestStatus.*;
 import static ru.practicum.exception.NotFoundException.notFoundException;
@@ -150,7 +149,7 @@ public class EventRequestServiceImpl implements EventRequestService {
     public EventRequestDto cancelRequest(Long userId, Long requestId) throws NotFoundException, ValidationException {
 
         if (!userFeignClient.existsById(userId)) {
-            throw new NotFoundException("Пользователь не найден userId=" + userId);
+            throw new NotFoundException("Пользователь не найден. Идентификатор пользователя: {0}", userId);
         }
 
         EventRequest request = requestRepository.findById(requestId).orElseThrow(notFoundException("Запрос не существует"));

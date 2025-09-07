@@ -43,7 +43,7 @@ public class CommentServiceImpl implements CommentService {
         EventFullDto event = fetchEvent(eventId);
 
         if (!EventState.PUBLISHED.equals(event.getState())) {
-            throw new ConflictException("Невозможно сохранить комментарии для неопубликованного события. ID события: {0}", event.getId());
+            throw new ConflictException("Невозможно сохранить комментарии для неопубликованного события. Идентификатор события: {0}", event.getId());
         }
 
         Comment comment = CommentMapper.toModel(commentDto, user, event);

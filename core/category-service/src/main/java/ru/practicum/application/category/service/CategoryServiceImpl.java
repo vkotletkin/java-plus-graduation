@@ -43,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws NotFoundException, ConflictException {
 
         Category category = categoryRepository.findById(catId)
-                .orElseThrow(notFoundException("Категория с ID: {0} - не найдена.", catId));
+                .orElseThrow(notFoundException("Категория с идентификатором: {0} - не найдена.", catId));
 
         boolean categoryExists = categoryRepository.findByName(categoryDto.getName()).stream()
                 .anyMatch(c -> !c.getId().equals(catId));
@@ -64,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto getCategoryById(Long catId) throws NotFoundException {
 
         Category category = categoryRepository.findById(catId)
-                .orElseThrow(notFoundException("Указанная категория не найдена. ID категории: {0}.", catId));
+                .orElseThrow(notFoundException("Указанная категория не найдена. Идентификатор категории: {0}.", catId));
 
         return CategoryMapper.toDto(category);
     }
@@ -83,7 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long catId) throws ConflictException, NotFoundException {
 
         if (!categoryRepository.existsById(catId)) {
-            throw new NotFoundException("Категория с ID: {0} не существует", catId);
+            throw new NotFoundException("Категория с идентификатором: {0} не существует", catId);
         }
 
         if (eventFeignClient.existsByCategoryId(catId)) {

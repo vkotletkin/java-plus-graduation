@@ -22,35 +22,35 @@ public class GlobalExceptionHandler {
         String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
         assert errorMessage != null;
         Map<String, String> error = Map.of("error", errorMessage);
-        log.warn("Validation error: {}", errorMessage);
+        log.warn("Ошибка валидации: {}", errorMessage);
         return error;
     }
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationException(final ValidationException e) {
-        log.error("Validation error: {}", e.getMessage());
+        log.error("Ошибка валидации: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFoundException(final NotFoundException e) {
-        log.error("Not found exception: {}", e.getMessage());
+        log.error("Объект не найден: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleConflictException(final ConflictException e) {
-        log.error("Conflict exception: {}", e.getMessage());
+        log.error("Ошибка связанная с конфликтом: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleError(final Throwable e) {
-        log.error("Unprocessed exception: {}", e.getMessage());
+        log.error("Необработанная ошибка: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 }

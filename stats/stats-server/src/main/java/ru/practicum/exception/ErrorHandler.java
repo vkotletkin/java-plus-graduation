@@ -15,14 +15,14 @@ public class ErrorHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationException(final ValidationException e) {
-        log.error("Validation exception: {}", e.getMessage());
+        log.error("Ошибка валидации: {}", e.getMessage());
         return Map.of("exception", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleNotFoundException(final NotFoundException e) {
-        log.error("Not found exception: {}", e.getMessage());
+        log.error("Объект не найден: {}", e.getMessage());
         return Map.of("exception", e.getMessage());
     }
 }
