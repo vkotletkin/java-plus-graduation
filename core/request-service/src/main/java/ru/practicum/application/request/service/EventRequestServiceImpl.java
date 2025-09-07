@@ -1,9 +1,6 @@
 package ru.practicum.application.request.service;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.application.request.mapper.EventRequestMapper;
@@ -25,31 +22,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.practicum.dto.enums.EventRequestStatus.*;
+import static ru.practicum.exception.NotFoundException.notFoundException;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Transactional(readOnly = true)
 public class EventRequestServiceImpl implements EventRequestService {
 
-    final RequestRepository requestRepository;
-    final UserFeignClient userClient;
-    final EventFeignClient eventClient;
+    private final RequestRepository requestRepository;
+    private final UserFeignClient userFeignClient;
+    private final EventFeignClient eventFeignClient;
 
     @Override
     @Transactional
     public EventRequestDto addRequest(Long userId, Long eventId) throws ConflictException, NotFoundException {
-        UserDto user = userClient.getById(userId);
+
+        UserDto user = userFeignClient.getById(userId);
         EventFullDto event = getEventById(eventId);
 
         if (event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Создатель события не может подать заявку на участие");
         }
+
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Событие не опубликовано");
         }
+
         List<EventRequest> requests = getEventRequestsByEventId(event.getId());
         participationLimitIsFull(event);
+
         for (EventRequest request : requests) {
             if (request.getRequester().equals(userId)) {
                 throw new ConflictException("Повторная заявка на участие в событии");
@@ -58,17 +59,20 @@ public class EventRequestServiceImpl implements EventRequestService {
 
         EventRequest newRequest = createNewEventRequest(user, event);
         EventRequest eventRequest = requestRepository.save(newRequest);
+
         return EventRequestMapper.mapRequest(eventRequest);
     }
 
     @Override
     public List<EventRequestDto> getUserRequests(Long userId) throws NotFoundException {
-        if (!userClient.existsById(userId)) {
-            throw new NotFoundException("Пользователь не найден userId=" + userId);
+
+        if (!userFeignClient.existsById(userId)) {
+            throw new NotFoundException("Пользователь с идентификатором: {0} - не найден", userId);
         }
+
         return requestRepository.findByUserId(userId).stream()
                 .map(EventRequestMapper::mapRequest)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -76,7 +80,7 @@ public class EventRequestServiceImpl implements EventRequestService {
         List<EventRequest> requests = getEventRequests(userId, eventId);
         return requests.stream()
                 .map(EventRequestMapper::mapRequest)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -84,9 +88,13 @@ public class EventRequestServiceImpl implements EventRequestService {
     public EventRequestDto updateRequest(Long userId,
                                          Long eventId,
                                          EventRequestDto updateRequest) throws ConflictException, ValidationException, NotFoundException {
+
         EventFullDto event = getEventById(eventId);
         List<EventRequest> requests = getEventRequestsByEventId(eventId);
-        long confirmedRequestsCounter = requests.stream().filter(r -> r.getStatus().equals(CONFIRMED_REQUEST)).count();
+
+        long confirmedRequestsCounter = requests.stream()
+                .filter(r -> r.getStatus().equals(CONFIRMED_REQUEST))
+                .count();
 
         List<EventRequestDto> confirmedRequests = new ArrayList<>();
         List<EventRequestDto> rejectedRequests = new ArrayList<>();
@@ -94,22 +102,20 @@ public class EventRequestServiceImpl implements EventRequestService {
         List<EventRequest> result = new ArrayList<>();
 
         List<EventRequest> pending = requests.stream()
-                .filter(p -> p.getStatus().equals(PENDING_REQUEST)).collect(Collectors.toList());
-
+                .filter(p -> p.getStatus().equals(PENDING_REQUEST))
+                .toList();
 
         for (EventRequest request : requests) {
             if (request.getStatus().equals(CONFIRMED_REQUEST) ||
                     request.getStatus().equals(REJECTED_REQUEST) ||
                     request.getStatus().equals(PENDING_REQUEST)) {
 
-                if (updateRequest.getStatus().equals(CONFIRMED_REQUEST) && event.getParticipantLimit() != 0) {
-                    if (event.getParticipantLimit() < confirmedRequestsCounter) {
+                if (updateRequest.getStatus().equals(CONFIRMED_REQUEST) && event.getParticipantLimit() != 0 &&
+                        event.getParticipantLimit() < confirmedRequestsCounter) {
 
-                        pending.stream().peek(p -> p.setStatus(REJECTED_REQUEST)).collect(Collectors.toList());
-
-                        throw new ConflictException("Превышено число возможных заявок на участие");
-                    }
+                    throw new ConflictException("Превышено число возможных заявок на участие");
                 }
+
 
                 if (updateRequest.getStatus().equals(REJECTED_REQUEST) && request.getStatus().equals(CONFIRMED_REQUEST)) {
                     throw new ConflictException("Нельзя отменить подтверждённую заявку");
@@ -143,16 +149,16 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Transactional
     public EventRequestDto cancelRequest(Long userId, Long requestId) throws NotFoundException, ValidationException {
 
-        if (!userClient.existsById(userId)) {
+        if (!userFeignClient.existsById(userId)) {
             throw new NotFoundException("Пользователь не найден userId=" + userId);
         }
 
-        EventRequest request = requestRepository.findById(requestId).orElseThrow(
-                () -> new NotFoundException("Запрос не существует")
-        );
+        EventRequest request = requestRepository.findById(requestId).orElseThrow(notFoundException("Запрос не существует"));
+
         if (!request.getRequester().equals(userId)) {
-            throw new ValidationException("Создатель заявки не userId=" + userId);
+            throw new ValidationException("Создатель заявки другой пользователь");
         }
+
         request.setStatus(CANCELED_REQUEST);
         return EventRequestMapper.mapRequest(requestRepository.save(request));
     }
@@ -166,52 +172,62 @@ public class EventRequestServiceImpl implements EventRequestService {
     public List<EventRequestDto> getByEventAndStatus(List<Long> eventId, String status) {
         return requestRepository.findByEventIdsAndStatus(eventId, status).stream()
                 .map(EventRequestMapper::mapRequest)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<EventRequestDto> findByEventIds(List<Long> id) {
         return requestRepository.findByEventIds(id).stream()
                 .map(EventRequestMapper::mapRequest)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private EventRequest createNewEventRequest(UserDto user, EventFullDto event) {
-        EventRequest newRequest = new EventRequest();
-        newRequest.setRequester(user.getId());
-        newRequest.setCreated(LocalDateTime.now());
-        newRequest.setStatus(event.getParticipantLimit() == 0 ? CONFIRMED_REQUEST : PENDING_REQUEST);
-        newRequest.setEvent(event.getId());
-        if (!event.getRequestModeration()) {
-            newRequest.setStatus(ACCEPTED_REQUEST);
+
+        EventRequest.EventRequestBuilder builder = EventRequest.builder()
+                .requester(user.getId())
+                .created(LocalDateTime.now())
+                .status(event.getParticipantLimit() == 0 ? CONFIRMED_REQUEST : PENDING_REQUEST)
+                .event(event.getId());
+
+        if (Boolean.FALSE.equals(event.getRequestModeration())) {
+            builder.status(ACCEPTED_REQUEST);
         }
-        return newRequest;
+
+        return builder.build();
     }
 
     private void participationLimitIsFull(EventFullDto event) throws ConflictException {
+
         Long confirmedRequestsCounter = requestRepository.countByEventAndStatuses(event.getId(), List.of("CONFIRMED", "ACCEPTED"));
+
         if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= confirmedRequestsCounter) {
             throw new ConflictException("Превышено число заявок на участие");
         }
     }
 
     private List<EventRequest> getEventRequests(Long userId, Long eventId) throws ValidationException, NotFoundException {
-        UserDto user = userClient.getById(userId);
+
+        UserDto user = userFeignClient.getById(userId);
         EventFullDto event = getEventById(eventId);
+
         if (!user.getId().equals(event.getInitiator().getId())) {
-            throw new ValidationException("Пользователь не инициатор события c id=" + eventId);
+            throw new ValidationException("Пользователь не инициатор события с ID: {0}", eventId);
         }
+
         return requestRepository.findByEventId(eventId);
     }
 
     private List<EventRequest> getEventRequestsByEventId(Long eventId) throws NotFoundException {
-        if (eventClient.existsById(eventId)) {
-            return requestRepository.findByEventId(eventId);
+
+        if (!eventFeignClient.existsById(eventId)) {
+            throw new NotFoundException("Событие с идентификатором: {0} - не найдено", eventId);
         }
-        throw new NotFoundException("Событие не найдено eventId=" + eventId);
+
+        return requestRepository.findByEventId(eventId);
     }
 
     private EventFullDto getEventById(Long eventId) throws NotFoundException {
-        return eventClient.getInnerEventById(eventId);
+        return eventFeignClient.getInnerEventById(eventId);
     }
 }
