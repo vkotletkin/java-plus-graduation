@@ -23,7 +23,6 @@ public class KafkaConfig {
     public KafkaConsumer<String, UserActionAvro> kafkaConsumer() {
 
         Properties config = new Properties();
-
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, settings.getUrl());
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "ru.practicum.stats.aggregator.kafka.UserActionAvroDeserializer");

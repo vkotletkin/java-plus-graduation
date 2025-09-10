@@ -1,8 +1,6 @@
 package ru.practicum.stats.aggregator.service;
 
-import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.kafka.clients.producer.Producer;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.stats.avro.ActionTypeAvro;
 import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
@@ -12,21 +10,17 @@ import ru.practicum.stats.aggregator.exception.IncorrectActionTypeException;
 import java.time.Instant;
 import java.util.*;
 
+@Slf4j
 @Service
 public class UserActionHandler {
 
-    // Kafka
-
-
-    // Params for inbound context
     private final Map<Long, Double> eventWeightSum;
     private final Map<EventPair, Double> eventsSimilarity;
     private final Map<Long, Double> sqrtCache;
     private final Map<Long, Map<Long, Double>> usersFeedback;
     private final Map<EventPair, Double> eventsMinWeightSum;
 
-    @Autowired
-    public UserActionHandler(Producer<String, SpecificRecordBase> producer) {
+    public UserActionHandler() {
         usersFeedback = new HashMap<>();
         eventsMinWeightSum = new HashMap<>();
         eventWeightSum = new HashMap<>();
@@ -40,8 +34,13 @@ public class UserActionHandler {
         Double weight = convertActionToWeight(avro.getActionType());
         Map<Long, Double> userRatings = usersFeedback.computeIfAbsent(eventId, k -> new HashMap<>());
         Double oldWeight = userRatings.getOrDefault(userId, 0.0);
-
-        return oldWeight < weight ? determineSimilarity(eventId, userId, oldWeight, weight, avro.getTimestamp()) : Collections.emptyList();
+        log.info("handle inner");
+        if (oldWeight < weight) {
+            userRatings.put(userId, weight);
+            return determineSimilarity(eventId, userId, oldWeight, weight, avro.getTimestamp());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
 
@@ -70,6 +69,7 @@ public class UserActionHandler {
                     .setTimestamp(timestamp)
                     .build();
             eventSimilarityAvros.add(message);
+            log.info(eventSimilarityAvros.toString());
         }
 
         return eventSimilarityAvros;
@@ -78,8 +78,7 @@ public class UserActionHandler {
     private double calculateSimilarity(EventPair pair, double commonSum) {
         double sqrtA = getSqrtSum(pair.first());
         double sqrtB = getSqrtSum(pair.second());
-        double similarity = commonSum / (sqrtA * sqrtB);
-        return similarity;
+        return commonSum / (sqrtA * sqrtB);
     }
 
     private double getSqrtSum(Long eventId) {
@@ -97,9 +96,7 @@ public class UserActionHandler {
             case LIKE -> {
                 return 1.0;
             }
-            default -> {
-                throw new IncorrectActionTypeException("Неверный тип действия пользователя: " + action);
-            }
+            default -> throw new IncorrectActionTypeException("Неверный тип действия пользователя: " + action);
         }
     }
 

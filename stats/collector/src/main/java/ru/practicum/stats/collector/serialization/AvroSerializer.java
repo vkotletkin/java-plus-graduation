@@ -28,7 +28,7 @@ public class AvroSerializer implements Serializer<SpecificRecordBase> {
             }
             return out.toByteArray();
         } catch (IOException ex) {
-            throw new SerializationException("Data serialization error for topic: [" + topic + "]", ex);
+            throw new SerializationException(String.format("Ошибка сериализации данных для топика: [%s]", topic));
         }
     }
 }

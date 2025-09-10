@@ -23,7 +23,7 @@ public class PublicEventController implements PublicEventApi {
     @Override
     public EventFullDto getEventById(Long id, Long userId,
                                      HttpServletRequest request) throws NotFoundException {
-        return eventService.getEventById(id, request.getRequestURI(), request.getRemoteAddr());
+        return eventService.getEventById(id, userId, request.getRequestURI(), request.getRemoteAddr());
     }
 
     @Override

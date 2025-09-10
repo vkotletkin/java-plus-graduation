@@ -34,7 +34,9 @@ public class AggregatorStarter implements Runnable {
     @Override
     public void run() {
         try {
+            log.info("Started consumers");
             Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
+            log.info("Подписка на топик: {}", settingsConfig.getAction());
             consumer.subscribe(List.of(settingsConfig.getAction()));
 
             log.info("Получение данных");
