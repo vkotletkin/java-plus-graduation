@@ -2,7 +2,10 @@ package ru.practicum.dto.event;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.dto.category.CategoryDto;
@@ -36,18 +39,11 @@ public class EventFullDto {
     String description;
 
     Integer participantLimit;
-
     EventState state;
-
     String createdOn;
-
     LocationDto location;
-
     Boolean requestModeration;
-
     Long confirmedRequests;
-
     String publishedOn;
-
-    Integer views;
+    Double rating;
 }
