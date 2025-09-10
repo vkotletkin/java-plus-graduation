@@ -24,7 +24,7 @@ public class KafkaConfig {
         Properties config = new Properties();
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaSettingsConfig.getUrl());
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
-        config.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "ru.practicum.stats.aggregator.kafka.UserActionAvroDeserializer");
+        config.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "ru.practicum.stats.aggregator.serialization.UserActionAvroDeserializer");
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, "aggregators-stats-ag");
 
         return new KafkaConsumer<>(config);

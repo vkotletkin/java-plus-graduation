@@ -37,13 +37,13 @@ public class UserActionDomainService {
         Double newWeight = convertActionToWeight(avro.getActionType());
         log.info("Вес действия пользователя: {}", newWeight);
 
-        Map<Long, Double> userRatings = usersFeedbackMap.computeIfAbsent(eventId, k -> new HashMap<>());
-        Double oldWeight = userRatings.getOrDefault(userId, 0.0);
+        Map<Long, Double> userRatingsMap = usersFeedbackMap.computeIfAbsent(eventId, k -> new HashMap<>());
+        Double oldWeight = userRatingsMap.getOrDefault(userId, 0.0);
 
         log.info("Сравнение старого веса и нового: {} и {}", oldWeight, newWeight);
         if (oldWeight < newWeight) {
             log.info("Новый вес больше старого");
-            userRatings.put(userId, newWeight);
+            userRatingsMap.put(userId, newWeight);
             return determineSimilarity(eventId, userId, oldWeight, newWeight, avro.getTimestamp());
         } else {
             return Collections.emptyList();
@@ -53,34 +53,38 @@ public class UserActionDomainService {
 
     private List<EventSimilarityAvro> determineSimilarity(Long eventId, Long userId, Double oldWeight, Double newWeight, Instant timestamp) {
 
-        double newSum = eventWeightSumMap.getOrDefault(eventId, 0.0) - oldWeight + newWeight;
-        eventWeightSumMap.put(eventId, newSum);
+        double updatedEventSum = eventWeightSumMap.getOrDefault(eventId, 0.0) - oldWeight + newWeight;
+        eventWeightSumMap.put(eventId, updatedEventSum);
         sqrtCacheMap.remove(eventId);
 
-        List<EventSimilarityAvro> eventSimilarityAvros = new ArrayList<>();
+        List<EventSimilarityAvro> similarityMessages = new ArrayList<>();
 
         for (Map.Entry<Long, Map<Long, Double>> entry : usersFeedbackMap.entrySet()) {
-            Long otherEventId = entry.getKey();
-            Map<Long, Double> feedback = entry.getValue();
-            if (!feedback.containsKey(userId) || Objects.equals(otherEventId, eventId)) continue;
-            double convergenceWeight = feedback.get(userId);
-            PairEvent pair = PairEvent.create(eventId, otherEventId);
-            double oldMinSum = eventsMinWeightSumMap.getOrDefault(pair, 0.0);
-            double newMinSum = oldMinSum - Math.min(oldWeight, convergenceWeight) + Math.min(newWeight, convergenceWeight);
-            eventsMinWeightSumMap.put(pair, newMinSum);
-            double similarity = calculateSimilarity(pair, newMinSum);
-            eventsSimilarityMap.put(pair, similarity);
+            Long currentEventId = entry.getKey();
+            Map<Long, Double> userFeedbackMap = entry.getValue();
+
+            if (!userFeedbackMap.containsKey(userId) || Objects.equals(currentEventId, eventId)) continue;
+
+            double userConvergenceWeight = userFeedbackMap.get(userId);
+            PairEvent eventPair = PairEvent.create(eventId, currentEventId);
+
+            double previousMinSum = eventsMinWeightSumMap.getOrDefault(eventPair, 0.0);
+            double updatedMinSum = previousMinSum - Math.min(oldWeight, userConvergenceWeight) + Math.min(newWeight, userConvergenceWeight);
+
+            eventsMinWeightSumMap.put(eventPair, updatedMinSum);
+            double similarityScore = calculateSimilarity(eventPair, updatedMinSum);
+            eventsSimilarityMap.put(eventPair, similarityScore);
+
             EventSimilarityAvro message = EventSimilarityAvro.newBuilder()
-                    .setEventA(pair.first())
-                    .setEventB(pair.second())
-                    .setScore(similarity)
+                    .setEventA(eventPair.first())
+                    .setEventB(eventPair.second())
+                    .setScore(similarityScore)
                     .setTimestamp(timestamp)
                     .build();
-            eventSimilarityAvros.add(message);
-            log.info(eventSimilarityAvros.toString());
+            similarityMessages.add(message);
         }
 
-        return eventSimilarityAvros;
+        return similarityMessages;
     }
 
     private double calculateSimilarity(PairEvent pair, double sumCommon) {

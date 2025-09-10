@@ -1,5 +1,6 @@
 package ru.practicum.stats.aggregator.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -9,7 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.WakeupException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 import ru.practicum.stats.aggregator.config.KafkaSettingsConfig;
@@ -20,7 +21,7 @@ import java.util.List;
 
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class AggregationService implements Runnable {
 
@@ -76,6 +77,13 @@ public class AggregationService implements Runnable {
                 }
             }
         }
+    }
+
+    @PostConstruct
+    public void init() {
+        Thread thread = new Thread(this);
+        thread.setName("aggregator");
+        thread.start();
     }
 }
 
