@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ConfigurationProperties("settings")
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
-public class SettingsConfig {
+public class KafkaSettingsConfig {
     private final String url;
     private final String action;
     private final String similarity;

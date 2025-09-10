@@ -8,7 +8,6 @@ import org.apache.kafka.clients.producer.Producer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
-import ru.practicum.stats.aggregator.service.UserActionHandler;
 
 import java.util.Properties;
 
@@ -17,13 +16,13 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-    private final SettingsConfig settings;
+    private final KafkaSettingsConfig kafkaSettingsConfig;
 
     @Bean
     public KafkaConsumer<String, UserActionAvro> kafkaConsumer() {
 
         Properties config = new Properties();
-        config.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, settings.getUrl());
+        config.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaSettingsConfig.getUrl());
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "ru.practicum.stats.aggregator.kafka.UserActionAvroDeserializer");
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, "aggregators-stats-ag");
@@ -35,7 +34,7 @@ public class KafkaConfig {
     public Producer<String, SpecificRecordBase> producer() {
 
         Properties config = new Properties();
-        config.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, settings.getUrl());
+        config.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaSettingsConfig.getUrl());
         config.put(org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         config.put(org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "ru.practicum.stats.aggregator.serialization.AvroSerializer");
 
