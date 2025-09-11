@@ -7,11 +7,10 @@ import ru.practicum.ewm.stats.proto.UserActionControllerGrpc;
 import ru.practicum.ewm.stats.proto.UserActionProto;
 
 @Component
-@RequiredArgsConstructor
 public class CollectorGrpcClient {
 
     @GrpcClient("collector")
-    private final UserActionControllerGrpc.UserActionControllerBlockingStub client;
+    private UserActionControllerGrpc.UserActionControllerBlockingStub client;
 
     public void sendUserAction(UserActionProto action) {
         client.collectUserAction(action);

@@ -9,11 +9,10 @@ import ru.practicum.ewm.stats.proto.*;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class AnalyzerGrpcClient {
 
     @GrpcClient("analyzer")
-    private final RecommendationsControllerGrpc.RecommendationsControllerBlockingStub client;
+    private RecommendationsControllerGrpc.RecommendationsControllerBlockingStub client;
 
     public List<RecommendedEventProto> getInteractionsCount(InteractionsCountRequestProto request) {
         return Lists.newArrayList(client.getInteractionsCount(request));

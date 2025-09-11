@@ -1,21 +1,26 @@
 package ru.practicum.application.request.service;
 
+import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.application.request.mapper.EventRequestMapper;
 import ru.practicum.application.request.model.EventRequest;
 import ru.practicum.application.request.repository.RequestRepository;
+import ru.practicum.client.CollectorGrpcClient;
 import ru.practicum.client.EventFeignClient;
 import ru.practicum.client.UserFeignClient;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.ewm.stats.proto.ActionTypeProto;
+import ru.practicum.ewm.stats.proto.UserActionProto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +36,13 @@ public class EventRequestServiceImpl implements EventRequestService {
     private final RequestRepository requestRepository;
     private final UserFeignClient userFeignClient;
     private final EventFeignClient eventFeignClient;
+    private final CollectorGrpcClient collectorGrpcClient;
 
     @Override
     @Transactional
     public EventRequestDto addRequest(Long userId, Long eventId) throws ConflictException, NotFoundException {
+
+        collectorGrpcClient.sendUserAction(createUserAction(eventId, userId, ActionTypeProto.ACTION_REGISTER, Instant.now()));
 
         UserDto user = userFeignClient.getById(userId);
         EventFullDto event = getEventById(eventId);
@@ -179,6 +187,24 @@ public class EventRequestServiceImpl implements EventRequestService {
         return requestRepository.findByEventIds(id).stream()
                 .map(EventRequestMapper::mapRequest)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public boolean isUserTakePart(Long userId, Long eventId) {
+        return requestRepository.userTakePart(userId, eventId);
+    }
+
+    private UserActionProto createUserAction(Long eventId, Long userId, ActionTypeProto type, Instant timestamp) {
+        return UserActionProto.newBuilder()
+                .setUserId(userId)
+                .setEventId(eventId)
+                .setActionType(type)
+                .setTimestamp(Timestamp.newBuilder()
+                        .setSeconds(timestamp.getEpochSecond())
+                        .setNanos(timestamp.getNano())
+                        .build())
+                .build();
     }
 
     private EventRequest createNewEventRequest(UserDto user, EventFullDto event) {
