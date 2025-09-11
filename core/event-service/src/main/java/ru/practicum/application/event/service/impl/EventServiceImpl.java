@@ -160,7 +160,7 @@ public class EventServiceImpl implements EventService {
                                 .setUserId(userId)
                                 .setMaxResult(10)
                                 .build()
-                ).stream().map(RecommendedEventProto::getEventId).collect(Collectors.toList())
+                ).stream().map(RecommendedEventProto::getEventId).toList()
         );
         List<Long> usersIds = events.stream().map(Event::getInitiator).toList();
         Set<Long> categoriesIds = events.stream().map(Event::getCategory).collect(Collectors.toSet());
@@ -210,8 +210,8 @@ public class EventServiceImpl implements EventService {
         Map<Long, CategoryDto> categories = categoryClient.getCategoriesByIds(categoriesIds).stream()
                 .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));
         InteractionsCountRequestProto proto = getInteractionsRequest(
-                events.stream().map(Event::getId).collect(Collectors.toList())
-        );
+                events.stream().map(Event::getId).toList());
+
         Map<Long, Double> eventRating = analyzerGrpcClient.getInteractionsCount(proto)
                 .stream().collect(Collectors.toMap(RecommendedEventProto::getEventId, RecommendedEventProto::getScore));
         return events.stream()
@@ -222,7 +222,7 @@ public class EventServiceImpl implements EventService {
                                 .count()
                 ))
                 .peek(dto -> eventRating.getOrDefault(dto.getId(), 0.0))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private InteractionsCountRequestProto getInteractionsRequest(List<Long> eventId) {

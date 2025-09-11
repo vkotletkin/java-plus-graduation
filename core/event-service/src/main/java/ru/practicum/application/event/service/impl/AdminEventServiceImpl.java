@@ -12,7 +12,6 @@ import ru.practicum.application.event.repository.LocationRepository;
 import ru.practicum.application.event.service.AdminEventService;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
-import ru.practicum.dto.enums.StateAction;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.dto.user.UserDto;
@@ -159,10 +158,6 @@ public class AdminEventServiceImpl implements AdminEventService {
 
         if (!event.getState().equals(EventState.PENDING)) {
             throw new ConflictException("Событие не в состоянии \"Ожидание публикации\", изменение события невозможно");
-        }
-
-        if ((!StateAction.REJECT_EVENT.toString().equals(updateRequest.getStateAction()) && event.getState().equals(EventState.PUBLISHED))) {
-            throw new ConflictException("Отклонить опубликованное событие невозможно");
         }
 
         updateEventWithAdminRequest(event, updateRequest);
