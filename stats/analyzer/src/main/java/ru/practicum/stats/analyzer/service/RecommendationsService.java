@@ -14,7 +14,10 @@ import ru.practicum.stats.analyzer.model.UserAction;
 import ru.practicum.stats.analyzer.repository.SimilarityRepository;
 import ru.practicum.stats.analyzer.repository.UserActionRepository;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,6 +50,33 @@ public class RecommendationsService {
         );
 
         sendRecommendations(recommendations, responseObserver);
+    }
+
+    public void getSimilarEvents(SimilarEventsRequestProto request,
+                                 StreamObserver<RecommendedEventProto> responseObserver) {
+
+        List<RecommendedEventProto> eventsSimilarity = similarityRepository.findByEventIdForUser(request.getEventId(),
+                        request.getUserId(), request.getMaxResult()).stream()
+                .map(e -> RecommendationsMapper.toRecommendedEventProto(
+                        e.getFirst() == request.getEventId() ? e.getSecond() : e.getFirst(), e.getScore()
+                )).toList();
+
+        for (RecommendedEventProto proto : eventsSimilarity) {
+            responseObserver.onNext(proto);
+        }
+    }
+
+    public void getInteractionsCount(InteractionsCountRequestProto request,
+                                     StreamObserver<RecommendedEventProto> responseObserver) {
+
+        List<RecommendedEventProto> eventInteractions = actionRepository.findInteractions(request.getEventIdList())
+                .stream().map(
+                        e -> RecommendedEventProto.newBuilder().setEventId((long) e[0]).setScore((double) e[1]).build()
+                ).toList();
+
+        for (RecommendedEventProto proto : eventInteractions) {
+            responseObserver.onNext(proto);
+        }
     }
 
     private List<Long> extractEventIds(List<UserAction> userActions) {
@@ -130,32 +160,5 @@ public class RecommendationsService {
     private void sendRecommendations(List<RecommendedEventProto> recommendations,
                                      StreamObserver<RecommendedEventProto> responseObserver) {
         recommendations.forEach(responseObserver::onNext);
-    }
-
-    public void getSimilarEvents(SimilarEventsRequestProto request,
-                                 StreamObserver<RecommendedEventProto> responseObserver) {
-
-        List<RecommendedEventProto> eventsSimilarity = similarityRepository.findByEventIdForUser(request.getEventId(),
-                        request.getUserId(), request.getMaxResult()).stream()
-                .map(e -> RecommendationsMapper.toRecommendedEventProto(
-                        e.getFirst() == request.getEventId() ? e.getSecond() : e.getFirst(), e.getScore()
-                )).toList();
-
-        for (RecommendedEventProto proto : eventsSimilarity) {
-            responseObserver.onNext(proto);
-        }
-    }
-
-    public void getInteractionsCount(InteractionsCountRequestProto request,
-                                     StreamObserver<RecommendedEventProto> responseObserver) {
-
-        List<RecommendedEventProto> eventInteractions = actionRepository.findInteractions(request.getEventIdList())
-                .stream().map(
-                        e -> RecommendedEventProto.newBuilder().setEventId((long) e[0]).setScore((double) e[1]).build()
-                ).toList();
-
-        for (RecommendedEventProto proto : eventInteractions) {
-            responseObserver.onNext(proto);
-        }
     }
 }
