@@ -10,6 +10,8 @@ import ru.practicum.stats.analyzer.model.embedded.UserActionId;
 import ru.practicum.stats.analyzer.repository.UserActionRepository;
 import ru.practicum.stats.analyzer.util.WeightConverter;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,15 +21,27 @@ public class UserActionService {
 
     public void save(UserActionAvro avro) {
 
-        log.info("Сохранение действия {} пользователя: {} для события с идентификатором: {}", avro.getActionType(),
-                avro.getUserId(), avro.getEventId());
-        UserActionId id = UserActionMapper.toUserActionId(avro);
+        log.info("Сохранение действия {} пользователя: {} для события с идентификатором: {}",
+                avro.getActionType(), avro.getUserId(), avro.getEventId());
 
-        if (!repository.existsById(id) ||
-                repository.findById(id).get().getScore() < WeightConverter.getWeightOnAction(avro.getActionType())) {
-            repository.save(UserActionMapper.toUserAction(avro));
+        UserActionId id = UserActionMapper.toUserActionId(avro);
+        Optional<UserAction> existingAction = repository.findById(id);
+
+        if (shouldSaveAction(existingAction, avro)) {
+            UserAction userAction = UserActionMapper.toUserAction(avro);
+            repository.save(userAction);
+        }
+    }
+
+    private boolean shouldSaveAction(Optional<UserAction> existingAction, UserActionAvro newAction) {
+
+        if (existingAction.isEmpty()) {
+            return true;
         }
 
-       // UserAction userAction = repository.findById(id).orElseThrow(notFoundException
+        double existingScore = existingAction.get().getScore();
+        double requiredWeight = WeightConverter.getWeightOnAction(newAction.getActionType());
+
+        return existingScore < requiredWeight;
     }
 }

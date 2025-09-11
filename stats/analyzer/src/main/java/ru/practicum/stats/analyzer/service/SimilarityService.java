@@ -15,8 +15,10 @@ public class SimilarityService {
     private final SimilarityRepository repository;
 
     public void save(EventSimilarityAvro avro) {
+
         log.info("Сохранение сходства событий {} и {}. Показатель сходства: {}",
                 avro.getEventA(), avro.getEventB(), avro.getScore());
+
         repository.deleteById(SimilarityMapper.toEventSimilarityId(avro));
         repository.save(SimilarityMapper.toEventSimilarity(avro));
     }
