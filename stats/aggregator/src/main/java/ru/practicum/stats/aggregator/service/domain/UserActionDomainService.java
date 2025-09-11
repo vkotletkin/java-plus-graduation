@@ -15,10 +15,10 @@ import java.util.*;
 public class UserActionDomainService {
 
     private final Map<Long, Double> eventWeightSumMap;
-    private final Map<PairEvent, Double> eventsSimilarityMap;
+    private final Map<RelationEvent, Double> eventsSimilarityMap;
     private final Map<Long, Double> sqrtCacheMap;
     private final Map<Long, Map<Long, Double>> usersFeedbackMap;
-    private final Map<PairEvent, Double> eventsMinWeightSumMap;
+    private final Map<RelationEvent, Double> eventsMinWeightSumMap;
 
     public UserActionDomainService() {
         usersFeedbackMap = new HashMap<>();
@@ -66,7 +66,7 @@ public class UserActionDomainService {
             if (!userFeedbackMap.containsKey(userId) || Objects.equals(currentEventId, eventId)) continue;
 
             double userConvergenceWeight = userFeedbackMap.get(userId);
-            PairEvent eventPair = PairEvent.create(eventId, currentEventId);
+            RelationEvent eventPair = RelationEvent.create(eventId, currentEventId);
 
             double previousMinSum = eventsMinWeightSumMap.getOrDefault(eventPair, 0.0);
             double updatedMinSum = previousMinSum - Math.min(oldWeight, userConvergenceWeight) + Math.min(newWeight, userConvergenceWeight);
@@ -87,7 +87,7 @@ public class UserActionDomainService {
         return similarityMessages;
     }
 
-    private double calculateSimilarity(PairEvent pair, double sumCommon) {
+    private double calculateSimilarity(RelationEvent pair, double sumCommon) {
         return sumCommon / (getSumOfSqrt(pair.first()) * getSumOfSqrt(pair.second()));
     }
 
