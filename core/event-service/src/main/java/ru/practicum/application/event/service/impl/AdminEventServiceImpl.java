@@ -10,10 +10,6 @@ import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
 import ru.practicum.application.event.repository.LocationRepository;
 import ru.practicum.application.event.service.AdminEventService;
-import ru.practicum.stats.client.AnalyzerGrpcClient;
-import ru.practicum.stats.client.CategoryFeignClient;
-import ru.practicum.stats.client.RequestFeignClient;
-import ru.practicum.stats.client.UserFeignClient;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.dto.enums.StateAction;
@@ -27,6 +23,10 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.exception.WrongDataException;
 import ru.practicum.request.event.UpdateEventAdminRequest;
+import ru.practicum.stats.client.AnalyzerGrpcClient;
+import ru.practicum.stats.client.CategoryFeignClient;
+import ru.practicum.stats.client.RequestFeignClient;
+import ru.practicum.stats.client.UserFeignClient;
 import ru.practicum.util.JsonFormatPattern;
 
 import java.time.LocalDateTime;
@@ -62,9 +62,9 @@ public class AdminEventServiceImpl implements AdminEventService {
         }
 
         if ((states == null) || (states.isEmpty())) {
-            eventStateList = Arrays.stream(EventState.values()).collect(Collectors.toList());
+            eventStateList = Arrays.stream(EventState.values()).toList();
         } else {
-            eventStateList = states.stream().map(EventState::valueOf).collect(Collectors.toList());
+            eventStateList = states.stream().map(EventState::valueOf).toList();
         }
 
         if (users == null && categories == null) {
@@ -73,12 +73,13 @@ public class AdminEventServiceImpl implements AdminEventService {
                     .stream().collect(Collectors.toMap(Event::getId, e -> e));
 
             List<EventRequestDto> requestsByEventIds = requestFeignClient.findByEventIds(allEventsWithDates.values().stream()
-                    .mapToLong(Event::getId).boxed().collect(Collectors.toList()));
+                    .mapToLong(Event::getId).boxed().toList());
 
             List<Long> usersIds = allEventsWithDates.values().stream().map(Event::getInitiator).toList();
-            Set<Long> categoriesIds = allEventsWithDates.values()
 
+            Set<Long> categoriesIds = allEventsWithDates.values()
                     .stream().map(Event::getCategory).collect(Collectors.toSet());
+
             Map<Long, UserDto> usersByRequests = userFeignClient.getUsersList(usersIds, 0, Math.max(allEventsWithDates.size(), 1))
                     .stream()
                     .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
@@ -131,9 +132,8 @@ public class AdminEventServiceImpl implements AdminEventService {
             ArrayList<Long> longs = eventDtos.stream()
                     .map(EventFullDto::getId).collect(Collectors.toCollection(ArrayList::new));
             List<EventRequestDto> requests = requestFeignClient.getByEventAndStatus(longs, "CONFIRMED");
-            Map<Long, Double> eventRating = analyzerGrpcClient.getInteractionsCount(
-                            InteractionsCountRequestProto.newBuilder().addAllEventId(longs).build())
-                    .stream().collect(Collectors.toMap(RecommendedEventProto::getEventId, RecommendedEventProto::getScore));
+            Map<Long, Double> eventRating = analyzerGrpcClient.getInteractionsCount(getInteractionsRequest(longs)).stream()
+                    .collect(Collectors.toMap(RecommendedEventProto::getEventId, RecommendedEventProto::getScore));
 
             return eventDtos.stream()
                     .peek(dto -> dto.setConfirmedRequests(
@@ -252,4 +252,7 @@ public class AdminEventServiceImpl implements AdminEventService {
         return eventFullDto;
     }
 
+    private InteractionsCountRequestProto getInteractionsRequest(List<Long> eventId) {
+        return InteractionsCountRequestProto.newBuilder().addAllEventId(eventId).build();
+    }
 }

@@ -1,6 +1,5 @@
 package ru.practicum.stats.client;
 
-import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.stats.proto.UserActionControllerGrpc;

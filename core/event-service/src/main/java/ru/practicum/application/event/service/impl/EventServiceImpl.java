@@ -174,7 +174,7 @@ public class EventServiceImpl implements EventService {
                 requestClient.countByEventAndStatuses(e.getId(), List.of("CONFIRMED")),
                 categories.get(e.getCategory()),
                 users.get(e.getInitiator())
-        )).collect(Collectors.toList());
+        )).toList();
     }
 
     @Override
