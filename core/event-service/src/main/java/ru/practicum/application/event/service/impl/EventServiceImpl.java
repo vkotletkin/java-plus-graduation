@@ -294,6 +294,7 @@ public class EventServiceImpl implements EventService {
         Map<Long, Double> eventRating = analyzerGrpcClient.getInteractionsCount(proto)
 
                 .stream().collect(Collectors.toMap(RecommendedEventProto::getEventId, RecommendedEventProto::getScore));
+
         return events.stream()
                 .map(e -> EventMapper.mapEventToShortDto(e, categories.get(e.getCategory()), users.get(e.getInitiator())))
                 .peek(dto -> dto.setConfirmedRequests(

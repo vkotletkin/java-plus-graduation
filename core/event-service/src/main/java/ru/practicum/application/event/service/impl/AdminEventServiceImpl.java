@@ -125,6 +125,7 @@ public class AdminEventServiceImpl implements AdminEventService {
     }
 
     private List<EventFullDto> convertEventsToDtos(Map<Long, Event> events) {
+
         List<Long> eventIds = extractEventIds(events);
         List<Long> userIds = extractUserIds(events);
         Set<Long> categoryIds = extractCategoryIds(events);
