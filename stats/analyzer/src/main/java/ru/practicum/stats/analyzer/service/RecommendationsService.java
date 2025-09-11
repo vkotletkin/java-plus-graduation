@@ -14,10 +14,7 @@ import ru.practicum.stats.analyzer.model.UserAction;
 import ru.practicum.stats.analyzer.repository.SimilarityRepository;
 import ru.practicum.stats.analyzer.repository.UserActionRepository;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j

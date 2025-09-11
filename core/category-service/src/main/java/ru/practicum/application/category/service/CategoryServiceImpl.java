@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.application.category.mapper.CategoryMapper;
 import ru.practicum.application.category.model.Category;
 import ru.practicum.application.category.repository.CategoryRepository;
-import ru.practicum.client.EventFeignClient;
+import ru.practicum.stats.client.EventFeignClient;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;

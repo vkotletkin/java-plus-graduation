@@ -28,6 +28,7 @@ public class KafkaConfig {
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "ru.practicum.stats.analyzer.serialization.EventSimilarityAvroDeserializer");
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "similarity-cg");
+        config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return new KafkaConsumer<>(config);
     }
@@ -40,7 +41,8 @@ public class KafkaConfig {
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaSettingsConfig.getUrl());
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "ru.practicum.stats.analyzer.serialization.UserActionAvroDeserializer");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "similarity-cg");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "user-action-cg");
+        config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return new KafkaConsumer<>(config);
     }

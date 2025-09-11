@@ -1,4 +1,4 @@
-package ru.practicum.client;
+package ru.practicum.stats.client;
 
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;

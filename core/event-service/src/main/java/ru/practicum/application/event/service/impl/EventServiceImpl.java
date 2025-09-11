@@ -10,7 +10,6 @@ import ru.practicum.application.event.mapper.EventMapper;
 import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
 import ru.practicum.application.event.service.EventService;
-import ru.practicum.client.*;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.dto.event.EventFullDto;
@@ -20,6 +19,7 @@ import ru.practicum.dto.user.UserDto;
 import ru.practicum.ewm.stats.proto.*;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.stats.client.*;
 import ru.practicum.util.JsonFormatPattern;
 
 import java.time.Instant;

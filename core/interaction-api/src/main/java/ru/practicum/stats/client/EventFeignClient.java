@@ -1,4 +1,4 @@
-package ru.practicum.client;
+package ru.practicum.stats.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import ru.practicum.api.event.ConventialEventApi;

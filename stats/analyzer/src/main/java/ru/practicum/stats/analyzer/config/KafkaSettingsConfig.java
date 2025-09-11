@@ -12,5 +12,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
 public class KafkaSettingsConfig {
     String url;
-    String topic;
+    String action;
+    String similarity;
 }

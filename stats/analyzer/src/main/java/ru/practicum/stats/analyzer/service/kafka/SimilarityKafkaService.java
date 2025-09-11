@@ -1,6 +1,7 @@
 package ru.practicum.stats.analyzer.service.kafka;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -30,21 +31,21 @@ public class SimilarityKafkaService implements Runnable {
         try {
 
             log.info("Запуск процесса получения данных консьюмером");
-            Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
 
-            consumer.subscribe(List.of(settingsConfig.getTopic()));
-            log.info("Осуществлена подписка на топик: {}", settingsConfig.getTopic());
+            consumer.subscribe(List.of(settingsConfig.getSimilarity()));
+            log.info("Осуществлена подписка на топик: {}", settingsConfig.getSimilarity());
 
             log.info("Начало получения данных из топика");
 
             while (true) {
 
                 ConsumerRecords<String, EventSimilarityAvro> records = consumer.poll(Duration.ofMillis(500));
-                log.info("Получено записей: {}", records.count());
 
                 for (ConsumerRecord<String, EventSimilarityAvro> datapart : records) {
                     service.save(datapart.value());
                 }
+
+                consumer.commitSync();
             }
         } catch (WakeupException ignored) {
             // wakeupexception ignored by shutdown hook
@@ -63,7 +64,12 @@ public class SimilarityKafkaService implements Runnable {
     @PostConstruct
     public void init() {
         Thread thread = new Thread(this);
-        thread.setName("similarty kafka consumer");
+        thread.setName("similarity-kafka-service");
         thread.start();
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        consumer.wakeup();
     }
 }
