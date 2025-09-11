@@ -68,6 +68,31 @@ public class AdminEventServiceImpl implements AdminEventService {
         return enrichEventsWithAdditionalData(eventDtos);
     }
 
+    @Override
+    public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest updateRequest) throws ConflictException, ValidationException, NotFoundException, WrongDataException {
+
+        Event event = eventRepository.findById(eventId).orElseThrow(notFoundException("Событие не существует. Идентификатор события: {0}", eventId));
+
+        if (LocalDateTime.now().isAfter(event.getEventDate().minus(2, ChronoUnit.HOURS))) {
+            throw new ConflictException("До начала события меньше часа, изменение события невозможно");
+        }
+
+        if (!event.getState().equals(EventState.PENDING)) {
+            throw new ConflictException("Событие не в состоянии \"Ожидание публикации\", изменение события невозможно");
+        }
+
+        updateEventWithAdminRequest(event, updateRequest);
+        if (event.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Событие уже завершилось");
+        }
+
+        saveLocation(event);
+        event = eventRepository.save(event);
+        EventFullDto eventFullDto = getEventFullDto(event);
+
+        return getViewsCounter(eventFullDto);
+    }
+
     private void validateTimeRange(LocalDateTime rangeStart, LocalDateTime rangeEnd) throws ValidationException {
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             throw new ValidationException("Время начала поиска позже времени конца поиска");
@@ -122,7 +147,7 @@ public class AdminEventServiceImpl implements AdminEventService {
     private List<Long> extractUserIds(Map<Long, Event> events) {
         return events.values().stream()
                 .map(Event::getInitiator)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Set<Long> extractCategoryIds(Map<Long, Event> events) {
@@ -162,7 +187,7 @@ public class AdminEventServiceImpl implements AdminEventService {
     private List<EventFullDto> enrichEventsWithAdditionalData(List<EventFullDto> eventDtos) {
         List<Long> eventIds = eventDtos.stream()
                 .map(EventFullDto::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         List<EventRequestDto> confirmedRequests = requestFeignClient.getByEventAndStatus(eventIds, "CONFIRMED");
         Map<Long, Double> eventRatings = fetchEventRatings(eventIds);
@@ -189,31 +214,6 @@ public class AdminEventServiceImpl implements AdminEventService {
         dto.setRating(eventRatings.getOrDefault(dto.getId(), 0.0));
 
         return dto;
-    }
-
-    @Override
-    public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest updateRequest) throws ConflictException, ValidationException, NotFoundException, WrongDataException {
-
-        Event event = eventRepository.findById(eventId).orElseThrow(notFoundException("Событие не существует. Идентификатор события: {0}", eventId));
-
-        if (LocalDateTime.now().isAfter(event.getEventDate().minus(2, ChronoUnit.HOURS))) {
-            throw new ConflictException("До начала события меньше часа, изменение события невозможно");
-        }
-
-        if (!event.getState().equals(EventState.PENDING)) {
-            throw new ConflictException("Событие не в состоянии \"Ожидание публикации\", изменение события невозможно");
-        }
-
-        updateEventWithAdminRequest(event, updateRequest);
-        if (event.getEventDate().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Событие уже завершилось");
-        }
-
-        saveLocation(event);
-        event = eventRepository.save(event);
-        EventFullDto eventFullDto = getEventFullDto(event);
-
-        return getViewsCounter(eventFullDto);
     }
 
     private EventFullDto getEventFullDto(Event event) throws NotFoundException {
@@ -277,7 +277,7 @@ public class AdminEventServiceImpl implements AdminEventService {
         }
     }
 
-    void saveLocation(Event event) {
+    private void saveLocation(Event event) {
         event.setLocation(locationRepository.save(event.getLocation()));
     }
 
