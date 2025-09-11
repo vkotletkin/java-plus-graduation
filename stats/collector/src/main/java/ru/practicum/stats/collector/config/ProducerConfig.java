@@ -1,6 +1,8 @@
 package ru.practicum.stats.collector.config;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -11,9 +13,10 @@ import java.util.Properties;
 
 @Configuration
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProducerConfig {
 
-    private final KafkaSettingsConfig kafkaSettingsConfig;
+    KafkaSettingsConfig kafkaSettingsConfig;
 
     @Bean
     public Producer<String, SpecificRecordBase> producer() {

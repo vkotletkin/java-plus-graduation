@@ -4,11 +4,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.stats.analyzer.model.EventSimilarity;
-import ru.practicum.stats.analyzer.model.EventSimilarityId;
+import ru.practicum.stats.analyzer.model.embedded.EventSimilarityId;
 
 import java.util.List;
 
 public interface SimilarityRepository extends JpaRepository<EventSimilarity, EventSimilarityId> {
+
     @Query("""
     SELECT es, CASE WHEN es.first = :eventId THEN es.second ELSE es.first END AS similarEvent
     FROM EventSimilarity es

@@ -1,6 +1,8 @@
 package ru.practicum.stats.aggregator.config;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,9 +16,10 @@ import java.util.Properties;
 
 @Configuration
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class KafkaConfig {
 
-    private final KafkaSettingsConfig kafkaSettingsConfig;
+    KafkaSettingsConfig kafkaSettingsConfig;
 
     @Bean
     public KafkaConsumer<String, UserActionAvro> kafkaConsumer() {

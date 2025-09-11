@@ -1,11 +1,13 @@
 package ru.practicum.stats.analyzer.mapper;
 
-import lombok.experimental.UtilityClass;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 
-@UtilityClass
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RecommendationsMapper {
-    public RecommendedEventProto mapSimilarityToRecommendation(Long eventId, Double score) {
+
+    public static RecommendedEventProto toRecommendedEventProto(Long eventId, Double score) {
         return RecommendedEventProto.newBuilder()
                 .setEventId(eventId)
                 .setScore(score)
