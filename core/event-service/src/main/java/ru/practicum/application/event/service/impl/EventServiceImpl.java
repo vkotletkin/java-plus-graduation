@@ -1,5 +1,6 @@
 package ru.practicum.application.event.service.impl;
 
+import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -9,21 +10,19 @@ import ru.practicum.application.event.mapper.EventMapper;
 import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
 import ru.practicum.application.event.service.EventService;
-import ru.practicum.client.CategoryFeignClient;
-import ru.practicum.client.RequestFeignClient;
-import ru.practicum.client.StatsClient;
-import ru.practicum.client.UserFeignClient;
-import ru.practicum.client.util.JsonFormatPattern;
-import ru.practicum.dto.StatsRequestDto;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.ewm.stats.proto.*;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.stats.client.*;
+import ru.practicum.util.JsonFormatPattern;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -44,17 +43,16 @@ public class EventServiceImpl implements EventService {
     private final UserFeignClient userClient;
     private final CategoryFeignClient categoryClient;
     private final RequestFeignClient requestClient;
-    private final StatsClient statsClient;
+    private final CollectorGrpcClient collectorGrpcClient;
+    private final AnalyzerGrpcClient analyzerGrpcClient;
 
     private final EventRepository eventRepository;
 
     @Override
-    public EventFullDto getEventById(Long eventId, String uri, String ip) throws NotFoundException {
+    public EventFullDto getEventById(Long eventId, Long userId, String uri, String ip) throws NotFoundException {
 
-        statsClient.save(new StatsRequestDto("main-server",
-                uri,
-                ip,
-                LocalDateTime.now()));
+        collectorGrpcClient.sendUserAction(
+                createUserAction(eventId, userId, ActionTypeProto.ACTION_VIEW, Instant.now()));
 
         Event event = eventRepository.findById(eventId).orElseThrow(notFoundException(NOT_FOUND_EVENT_MESSAGE, eventId));
 
@@ -62,7 +60,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Такого события не существует");
         }
 
-        var confirmed = requestClient.countByEventAndStatuses(event.getId(), List.of("CONFIRMED"));
+        long confirmed = requestClient.countByEventAndStatuses(event.getId(), List.of("CONFIRMED"));
 
         EventFullDto eventFullDto = EventMapper.mapEventToFullDto(
                 event,
@@ -71,11 +69,10 @@ public class EventServiceImpl implements EventService {
                 userClient.getById(event.getInitiator())
         );
 
-        List<String> urls = Collections.singletonList(uri);
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
-        LocalDateTime end = LocalDateTime.now();
+        List<RecommendedEventProto> proto = analyzerGrpcClient.getInteractionsCount(getInteractionsRequest(List.of(eventId)));
 
-        eventFullDto.setViews(statsClient.getStats(start, end, urls, true).size());
+        Double rating = proto.isEmpty() ? 0.0 : proto.getFirst().getScore();
+        eventFullDto.setRating(rating);
 
         return eventFullDto;
     }
@@ -93,103 +90,210 @@ public class EventServiceImpl implements EventService {
                                                  String uri,
                                                  String ip) throws ValidationException {
 
-        List<Event> events;
-        LocalDateTime startDate;
-        LocalDateTime endDate;
+        boolean sortByDate = isSortByDate(sort);
 
-        boolean sortDate = sort.equals("EVENT_DATE");
-
-        if (sortDate) {
-            if (rangeStart == null && rangeEnd == null && categories != null) {
-
-                events = eventRepository.findAllByCategoryIdPageable(categories, EventState.PUBLISHED,
-                        PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, PAGE_REQUEST_SORTING_PARAMETER)));
-            } else {
-                startDate = (rangeStart == null) ? LocalDateTime.now() :
-                        LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
-
-                if (text == null) {
-
-                    text = "";
-                }
-
-                if (rangeEnd == null) {
-                    events = eventRepository.findEventsByText("%" + text.toLowerCase() + "%", EventState.PUBLISHED,
-                            PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, PAGE_REQUEST_SORTING_PARAMETER)));
-                } else {
-                    endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
-                    if (startDate.isAfter(endDate)) {
-                        throw new ValidationException(DATE_AND_TIME_VALIDATION_MESSAGE);
-                    }
-                    events = eventRepository.findAllByTextAndDateRange("%" + text.toLowerCase() + "%",
-                            startDate,
-                            endDate,
-                            EventState.PUBLISHED,
-                            PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, PAGE_REQUEST_SORTING_PARAMETER)));
-
-                }
-            }
+        if (sortByDate) {
+            return getEventsSortedByDate(text, categories, paid, rangeStart, rangeEnd,
+                    onlyAvailable, from, size);
         } else {
-            startDate = (rangeStart == null) ? LocalDateTime.now() :
-                    LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
-
-            if (rangeEnd == null) {
-                endDate = null;
-            } else {
-                endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
-            }
-            if (rangeStart != null && rangeEnd != null && startDate.isAfter(endDate)) {
-                throw new ValidationException(DATE_AND_TIME_VALIDATION_MESSAGE);
-            }
-
-            events = eventRepository.findEventList(text, categories, paid, startDate, endDate, EventState.PUBLISHED);
+            return getEventsSortedByViews(text, categories, paid, rangeStart, rangeEnd,
+                    onlyAvailable, from, size);
         }
+    }
 
-        statsClient.save(new StatsRequestDto("main-server",
-                uri,
-                ip,
-                LocalDateTime.now()));
+    private boolean isSortByDate(String sort) {
+        return "EVENT_DATE".equals(sort);
+    }
 
-        if (!sortDate) {
-            List<EventShortDto> shortEventDtos = createShortEventDtos(events);
-            shortEventDtos.sort(Comparator.comparing(EventShortDto::getViews));
-            shortEventDtos = shortEventDtos.subList(from, Math.min(from + size, shortEventDtos.size()));
-            return shortEventDtos;
+    private List<EventShortDto> getEventsSortedByDate(String text,
+                                                      List<Long> categories,
+                                                      Boolean paid,
+                                                      String rangeStart,
+                                                      String rangeEnd,
+                                                      Boolean onlyAvailable,
+                                                      Integer from,
+                                                      Integer size) throws ValidationException {
+
+        List<Event> events;
+
+        if (isDefaultDateRangeWithCategories(rangeStart, rangeEnd, categories)) {
+            events = getEventsByCategoriesOnly(categories, from, size);
+        } else {
+            events = getEventsWithDateRange(text, rangeStart, rangeEnd, from, size);
         }
 
         return createShortEventDtos(events);
     }
 
-    List<EventShortDto> createShortEventDtos(List<Event> events) {
+    private boolean isDefaultDateRangeWithCategories(String rangeStart, String rangeEnd, List<Long> categories) {
+        return rangeStart == null && rangeEnd == null && categories != null;
+    }
 
-        HashMap<Long, Integer> eventIdsWithViewsCounter = new HashMap<>();
+    private List<Event> getEventsByCategoriesOnly(List<Long> categories, Integer from, Integer size) {
+        return eventRepository.findAllByCategoryIdPageable(categories, EventState.PUBLISHED,
+                createPageRequest(from, size, Sort.Direction.DESC, PAGE_REQUEST_SORTING_PARAMETER));
+    }
 
-        LocalDateTime startTime = events.getFirst().getCreatedOn();
-        ArrayList<String> uris = new ArrayList<>();
-        for (Event event : events) {
-            uris.add("/events/" + event.getId().toString());
-            if (startTime.isAfter(event.getCreatedOn())) {
-                startTime = event.getCreatedOn();
-            }
+    private List<Event> getEventsWithDateRange(String text,
+                                               String rangeStart,
+                                               String rangeEnd,
+                                               Integer from,
+                                               Integer size) throws ValidationException {
+
+        LocalDateTime startDate = parseDateTime(rangeStart, LocalDateTime.now());
+        String searchText = getSearchText(text);
+
+        if (rangeEnd == null) {
+            return getEventsByTextOnly(searchText, from, size);
+        } else {
+            LocalDateTime endDate = parseDateTime(rangeEnd, null);
+            validateDateRange(startDate, endDate);
+            return getEventsByTextAndDateRange(searchText, startDate, endDate, from, size);
         }
+    }
 
-        var viewsCounter = statsClient.getStats(startTime, LocalDateTime.now(), uris, true);
+    private List<EventShortDto> getEventsSortedByViews(String text,
+                                                       List<Long> categories,
+                                                       Boolean paid,
+                                                       String rangeStart,
+                                                       String rangeEnd,
+                                                       Boolean onlyAvailable,
+                                                       Integer from,
+                                                       Integer size) throws ValidationException {
 
-        for (var statsDto : viewsCounter) {
-            String[] split = statsDto.getUri().split("/");
-            eventIdsWithViewsCounter.put(Long.parseLong(split[2]), Math.toIntExact(statsDto.getHits()));
+        LocalDateTime startDate = parseDateTime(rangeStart, LocalDateTime.now());
+        LocalDateTime endDate = parseDateTime(rangeEnd, null);
+
+        validateDateRangeIfProvided(rangeStart, rangeEnd, startDate, endDate);
+
+        List<Event> events = eventRepository.findEventList(text, categories, paid,
+                startDate, endDate, EventState.PUBLISHED);
+
+        return createAndSortShortEventDtos(events, from, size);
+    }
+
+    private LocalDateTime parseDateTime(String dateTimeString, LocalDateTime defaultValue) {
+        if (dateTimeString == null) {
+            return defaultValue;
         }
+        return LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
+    }
 
-        List<EventRequestDto> requests = requestClient.findByEventIds(new ArrayList<>(eventIdsWithViewsCounter.keySet()));
+    private String getSearchText(String text) {
+        return text == null ? "" : "%" + text.toLowerCase() + "%";
+    }
+
+    private void validateDateRange(LocalDateTime startDate, LocalDateTime endDate) throws ValidationException {
+        if (startDate.isAfter(endDate)) {
+            throw new ValidationException(DATE_AND_TIME_VALIDATION_MESSAGE);
+        }
+    }
+
+    private void validateDateRangeIfProvided(String rangeStart, String rangeEnd,
+                                             LocalDateTime startDate, LocalDateTime endDate) throws ValidationException {
+        if (rangeStart != null && rangeEnd != null && startDate.isAfter(endDate)) {
+            throw new ValidationException(DATE_AND_TIME_VALIDATION_MESSAGE);
+        }
+    }
+
+    private List<Event> getEventsByTextOnly(String searchText, Integer from, Integer size) {
+        return eventRepository.findEventsByText(searchText, EventState.PUBLISHED,
+                createPageRequest(from, size, Sort.Direction.DESC, PAGE_REQUEST_SORTING_PARAMETER));
+    }
+
+    private List<Event> getEventsByTextAndDateRange(String searchText,
+                                                    LocalDateTime startDate,
+                                                    LocalDateTime endDate,
+                                                    Integer from,
+                                                    Integer size) {
+        return eventRepository.findAllByTextAndDateRange(searchText, startDate, endDate, EventState.PUBLISHED,
+                createPageRequest(from, size, Sort.Direction.DESC, PAGE_REQUEST_SORTING_PARAMETER));
+    }
+
+    private PageRequest createPageRequest(Integer from, Integer size, Sort.Direction direction, String... properties) {
+        return PageRequest.of(from / size, size, Sort.by(direction, properties));
+    }
+
+    private List<EventShortDto> createAndSortShortEventDtos(List<Event> events, Integer from, Integer size) {
+        List<EventShortDto> shortEventDtos = createShortEventDtos(events);
+        shortEventDtos.sort(Comparator.comparing(EventShortDto::getRating));
+        return paginateList(shortEventDtos, from, size);
+    }
+
+    private <T> List<T> paginateList(List<T> list, Integer from, Integer size) {
+        int toIndex = Math.min(from + size, list.size());
+        return list.subList(from, toIndex);
+    }
+
+    @Override
+    public List<EventFullDto> getRecommendations(Long userId) {
+
+        List<Event> events = eventRepository.findAllById(
+                analyzerGrpcClient.getRecommendationsForUser(
+                        UserPredictionsRequestProto.newBuilder()
+                                .setUserId(userId)
+                                .setMaxResult(10)
+                                .build()
+                ).stream().map(RecommendedEventProto::getEventId).toList()
+        );
+
         List<Long> usersIds = events.stream().map(Event::getInitiator).toList();
 
         Set<Long> categoriesIds = events.stream().map(Event::getCategory).collect(Collectors.toSet());
 
         Map<Long, UserDto> users = userClient.getUsersList(usersIds, 0, Math.max(events.size(), 1)).stream()
                 .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
+        Map<Long, CategoryDto> categories = categoryClient.getCategoriesByIds(categoriesIds).stream()
+                .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));
+
+        return events.stream().map(e -> EventMapper.mapEventToFullDto(
+                e,
+                requestClient.countByEventAndStatuses(e.getId(), List.of("CONFIRMED")),
+                categories.get(e.getCategory()),
+                users.get(e.getInitiator())
+        )).toList();
+    }
+
+    @Override
+    public void likeEvent(Long eventId, Long userId) throws ValidationException {
+
+        if (!requestClient.isUserTakePart(userId, eventId)) {
+            throw new ValidationException("Пользователь " + userId + " не принимал участи в событии " + eventId);
+        }
+
+        collectorGrpcClient.sendUserAction(createUserAction(eventId, userId, ActionTypeProto.ACTION_LIKE, Instant.now()));
+    }
+
+    private UserActionProto createUserAction(Long eventId, Long userId, ActionTypeProto type, Instant timestamp) {
+        return UserActionProto.newBuilder()
+                .setUserId(userId)
+                .setEventId(eventId)
+                .setActionType(type)
+                .setTimestamp(Timestamp.newBuilder()
+                        .setSeconds(timestamp.getEpochSecond())
+                        .setNanos(timestamp.getNano())
+                        .build())
+                .build();
+    }
+
+    private List<EventShortDto> createShortEventDtos(List<Event> events) {
+
+        List<EventRequestDto> requests = requestClient.findByEventIds(new ArrayList<>(
+                events.stream().map(Event::getId).toList()));
+
+        List<Long> usersIds = events.stream().map(Event::getInitiator).toList();
+        Set<Long> categoriesIds = events.stream().map(Event::getCategory).collect(Collectors.toSet());
+        Map<Long, UserDto> users = userClient.getUsersList(usersIds, 0, Math.max(events.size(), 1)).stream()
+                .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
 
         Map<Long, CategoryDto> categories = categoryClient.getCategoriesByIds(categoriesIds).stream()
                 .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));
+        InteractionsCountRequestProto proto = getInteractionsRequest(
+                events.stream().map(Event::getId).toList());
+
+        Map<Long, Double> eventRating = analyzerGrpcClient.getInteractionsCount(proto)
+
+                .stream().collect(Collectors.toMap(RecommendedEventProto::getEventId, RecommendedEventProto::getScore));
 
         return events.stream()
                 .map(e -> EventMapper.mapEventToShortDto(e, categories.get(e.getCategory()), users.get(e.getInitiator())))
@@ -198,7 +302,11 @@ public class EventServiceImpl implements EventService {
                                 .filter((request -> request.getEvent().equals(dto.getId())))
                                 .count()
                 ))
-                .peek(dto -> dto.setViews(eventIdsWithViewsCounter.get(dto.getId())))
+                .peek(dto -> eventRating.getOrDefault(dto.getId(), 0.0))
                 .toList();
+    }
+
+    private InteractionsCountRequestProto getInteractionsRequest(List<Long> eventId) {
+        return InteractionsCountRequestProto.newBuilder().addAllEventId(eventId).build();
     }
 }

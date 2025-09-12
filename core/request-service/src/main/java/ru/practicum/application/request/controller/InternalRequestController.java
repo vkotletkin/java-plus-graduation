@@ -30,4 +30,9 @@ public class InternalRequestController implements InternalEventRequestApi {
     public List<EventRequestDto> findByEventIds(List<Long> id) {
         return service.findByEventIds(id);
     }
+
+    @Override
+    public boolean isUserTakePart(Long userId, Long eventId) {
+        return service.isUserTakePart(userId, eventId);
+    }
 }

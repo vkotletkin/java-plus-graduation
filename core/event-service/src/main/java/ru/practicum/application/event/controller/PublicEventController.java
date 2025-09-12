@@ -21,9 +21,9 @@ public class PublicEventController implements PublicEventApi {
     private final EventService eventService;
 
     @Override
-    public EventFullDto getEventById(Long id,
+    public EventFullDto getEventById(Long id, Long userId,
                                      HttpServletRequest request) throws NotFoundException {
-        return eventService.getEventById(id, request.getRequestURI(), request.getRemoteAddr());
+        return eventService.getEventById(id, userId, request.getRequestURI(), request.getRemoteAddr());
     }
 
     @Override
@@ -40,5 +40,16 @@ public class PublicEventController implements PublicEventApi {
     ) throws ValidationException {
         return eventService.getFilteredEvents(text, categories, paid, rangeStart, rangeEnd, available, sort, from, count,
                 request.getRequestURI(), request.getRemoteAddr());
+    }
+
+
+    @Override
+    public List<EventFullDto> getRecommendations(Long userId) {
+        return eventService.getRecommendations(userId);
+    }
+
+    @Override
+    public void likeEvent(Long eventId, Long userId) throws ValidationException {
+        eventService.likeEvent(eventId, userId);
     }
 }

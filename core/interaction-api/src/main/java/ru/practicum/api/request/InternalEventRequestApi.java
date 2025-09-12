@@ -21,4 +21,7 @@ public interface InternalEventRequestApi {
 
     @GetMapping(INTERNAL_REQUEST_PATH + "/{event-id}/status/count")
     Long countByEventAndStatuses(@PathVariable(name = "event-id") Long eventId, @RequestParam List<String> statuses);
+
+    @GetMapping("/internal/{user-id}/take/{event-id}")
+    boolean isUserTakePart(@PathVariable(name = "user-id") Long userId, @PathVariable(name = "event-id") Long eventId);
 }

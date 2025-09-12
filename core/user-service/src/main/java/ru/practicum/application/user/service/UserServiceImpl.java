@@ -13,7 +13,6 @@ import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.practicum.exception.NotFoundException.notFoundException;
 
@@ -53,7 +52,7 @@ public class UserServiceImpl implements UserService {
                 userRepository.findAll(page).getContent() :
                 userRepository.findAllByIdsPageable(ids, page);
 
-        return users.stream().map(UserMapper::toDto).collect(Collectors.toList());
+        return users.stream().map(UserMapper::toDto).toList();
     }
 
     @Override

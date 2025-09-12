@@ -7,14 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.application.category.mapper.CategoryMapper;
 import ru.practicum.application.category.model.Category;
 import ru.practicum.application.category.repository.CategoryRepository;
-import ru.practicum.client.EventFeignClient;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.stats.client.EventFeignClient;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static ru.practicum.exception.NotFoundException.notFoundException;
 
@@ -30,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDto addCategory(CategoryDto categoryDto) throws ConflictException {
 
-        if (categoryRepository.existsByName(categoryDto.getName())) {
+        if (Boolean.TRUE.equals(categoryRepository.existsByName(categoryDto.getName()))) {
             throw new ConflictException("Категория событий с именем: {0} уже существует", categoryDto.getName());
         }
 
@@ -75,7 +74,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .getContent()
                 .stream()
                 .map(CategoryMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -96,7 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getCategoriesByIds(Set<Long> ids) {
-        return categoryRepository.findAllById(ids).stream().map(CategoryMapper::toDto).collect(Collectors.toList());
+        return categoryRepository.findAllById(ids).stream().map(CategoryMapper::toDto).toList();
     }
 
     @Override

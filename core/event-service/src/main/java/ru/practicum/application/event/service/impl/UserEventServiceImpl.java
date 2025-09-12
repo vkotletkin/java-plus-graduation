@@ -9,11 +9,10 @@ import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
 import ru.practicum.application.event.repository.LocationRepository;
 import ru.practicum.application.event.service.UserEventService;
-import ru.practicum.client.CategoryFeignClient;
-import ru.practicum.client.RequestFeignClient;
-import ru.practicum.client.StatsClient;
-import ru.practicum.client.UserFeignClient;
-import ru.practicum.client.util.JsonFormatPattern;
+import ru.practicum.stats.client.AnalyzerGrpcClient;
+import ru.practicum.stats.client.CategoryFeignClient;
+import ru.practicum.stats.client.RequestFeignClient;
+import ru.practicum.stats.client.UserFeignClient;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
 import ru.practicum.dto.enums.StateAction;
@@ -21,15 +20,17 @@ import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.ewm.stats.proto.InteractionsCountRequestProto;
+import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.exception.WrongDataException;
 import ru.practicum.request.event.UpdateEventUserRequest;
+import ru.practicum.util.JsonFormatPattern;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class UserEventServiceImpl implements UserEventService {
     private final UserFeignClient userFeignClient;
     private final CategoryFeignClient categoryFeignClient;
     private final RequestFeignClient requestFeignClient;
-    private final StatsClient statsClient;
+    private final AnalyzerGrpcClient analyzerGrpcClient;
 
     private static void validationEventDate(Event event) throws ValidationException, WrongDataException {
 
@@ -116,7 +117,7 @@ public class UserEventServiceImpl implements UserEventService {
 
         Long confirmed = requestFeignClient.countByEventAndStatuses(event.getId(), List.of("CONFIRMED"));
 
-        return getViewsCounter(EventMapper.mapEventToFullDto(event, confirmed,
+        return getRatingCounter(EventMapper.mapEventToFullDto(event, confirmed,
                 categoryFeignClient.getCategoryById(event.getCategory()), user));
     }
 
@@ -150,7 +151,7 @@ public class UserEventServiceImpl implements UserEventService {
         }
 
         Long confirmed = requestFeignClient.countByEventAndStatuses(event.getId(), List.of("CONFIRMED"));
-        return getViewsCounter(EventMapper.mapEventToFullDto(event, confirmed,
+        return getRatingCounter(EventMapper.mapEventToFullDto(event, confirmed,
                 categoryFeignClient.getCategoryById(event.getCategory()), user));
     }
 
@@ -218,15 +219,13 @@ public class UserEventServiceImpl implements UserEventService {
         }
     }
 
-    private EventFullDto getViewsCounter(EventFullDto eventFullDto) {
+    private EventFullDto getRatingCounter(EventFullDto eventFullDto) {
 
-        ArrayList<String> urls = new ArrayList<>(List.of("/events/" + eventFullDto.getId()));
-
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
-        LocalDateTime end = LocalDateTime.now();
-
-        Integer views = statsClient.getStats(start, end, urls, true).size();
-        eventFullDto.setViews(views);
+        List<RecommendedEventProto> protos = analyzerGrpcClient.getInteractionsCount(
+                InteractionsCountRequestProto.newBuilder().addEventId(eventFullDto.getId()).build()
+        );
+        Double rating = protos.isEmpty() ? 0.0 : protos.getFirst().getScore();
+        eventFullDto.setRating(rating);
         return eventFullDto;
     }
 }

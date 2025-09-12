@@ -10,22 +10,22 @@ import ru.practicum.application.event.model.Event;
 import ru.practicum.application.event.repository.EventRepository;
 import ru.practicum.application.event.repository.LocationRepository;
 import ru.practicum.application.event.service.AdminEventService;
-import ru.practicum.client.CategoryFeignClient;
-import ru.practicum.client.RequestFeignClient;
-import ru.practicum.client.StatsClient;
-import ru.practicum.client.UserFeignClient;
-import ru.practicum.dto.StatsResponseDto;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.enums.EventState;
-import ru.practicum.dto.enums.StateAction;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.request.EventRequestDto;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.ewm.stats.proto.InteractionsCountRequestProto;
+import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.exception.WrongDataException;
 import ru.practicum.request.event.UpdateEventAdminRequest;
+import ru.practicum.stats.client.AnalyzerGrpcClient;
+import ru.practicum.stats.client.CategoryFeignClient;
+import ru.practicum.stats.client.RequestFeignClient;
+import ru.practicum.stats.client.UserFeignClient;
 import ru.practicum.util.JsonFormatPattern;
 
 import java.time.LocalDateTime;
@@ -45,121 +45,27 @@ public class AdminEventServiceImpl implements AdminEventService {
     private final UserFeignClient userFeignClient;
     private final CategoryFeignClient categoryFeignClient;
     private final RequestFeignClient requestFeignClient;
-    private final StatsClient statsClient;
+    private final AnalyzerGrpcClient analyzerGrpcClient;
 
     private final EventRepository eventRepository;
     private final LocationRepository locationRepository;
 
     @Override
-    public List<EventFullDto> getEvents(List<Long> users, List<String> states, List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) throws ValidationException {
+    public List<EventFullDto> getEvents(List<Long> users, List<String> states, List<Long> categories,
+                                        LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                        Integer from, Integer size) throws ValidationException {
 
-        List<EventFullDto> eventDtos;
-        List<EventState> eventStateList;
+        validateTimeRange(rangeStart, rangeEnd);
+        List<EventState> eventStateList = parseEventStates(states);
 
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new ValidationException("Время начала поиска позже времени конца поиска");
-        }
+        Map<Long, Event> events = fetchEvents(users, eventStateList, categories, rangeStart, rangeEnd, from, size);
 
-        if ((states == null) || (states.isEmpty())) {
-            eventStateList = Arrays.stream(EventState.values()).collect(Collectors.toList());
-        } else {
-            eventStateList = states.stream().map(EventState::valueOf).collect(Collectors.toList());
-        }
-
-        if (users == null && categories == null) {
-
-            Map<Long, Event> allEventsWithDates = new ArrayList<>(eventRepository.findAll(PageRequest.of(from / size, size)).getContent())
-                    .stream().collect(Collectors.toMap(Event::getId, e -> e));
-
-            List<EventRequestDto> requestsByEventIds = requestFeignClient.findByEventIds(allEventsWithDates.values().stream()
-                    .mapToLong(Event::getId).boxed().collect(Collectors.toList()));
-
-            List<Long> usersIds = allEventsWithDates.values().stream().map(Event::getInitiator).toList();
-            Set<Long> categoriesIds = allEventsWithDates.values()
-
-                    .stream().map(Event::getCategory).collect(Collectors.toSet());
-            Map<Long, UserDto> usersByRequests = userFeignClient.getUsersList(usersIds, 0, Math.max(allEventsWithDates.size(), 1))
-                    .stream()
-                    .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
-
-            Map<Long, CategoryDto> categoriesByRequests = categoryFeignClient.getCategoriesByIds(categoriesIds).stream()
-                    .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));
-
-            eventDtos = allEventsWithDates.values().stream()
-                    .map(e -> EventMapper.mapEventToFullDto(e,
-                            requestsByEventIds.stream()
-                                    .filter(r -> r.getId().equals(e.getId()))
-                                    .count(),
-                            categoriesByRequests.get(e.getCategory()),
-                            usersByRequests.get(e.getInitiator())))
-                    .toList();
-
-        } else {
-
-            Map<Long, Event> allEventsWithDates = eventRepository.findAllEventsWithDates(users,
-                            eventStateList, categories, rangeStart, rangeEnd,
-                            PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "e.eventDate")))
-                    .stream().collect(Collectors.toMap(Event::getId, e -> e));
-
-            List<EventRequestDto> requestsByEventIds = requestFeignClient.findByEventIds(allEventsWithDates.values().stream()
-                    .mapToLong(Event::getId).boxed().collect(Collectors.toList()));
-
-            List<Long> usersIds = allEventsWithDates.values().stream().map(Event::getInitiator).toList();
-            Set<Long> categoriesIds = allEventsWithDates.values()
-                    .stream().map(Event::getCategory).collect(Collectors.toSet());
-
-            Map<Long, UserDto> usersByRequests = userFeignClient.getUsersList(usersIds, 0, Math.max(allEventsWithDates.size(), 1))
-                    .stream()
-                    .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
-
-            Map<Long, CategoryDto> categoriesByRequests = categoryFeignClient.getCategoriesByIds(categoriesIds).stream()
-                    .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));
-
-            eventDtos = allEventsWithDates.values().stream()
-                    .map(e -> EventMapper.mapEventToFullDto(e,
-                            requestsByEventIds.stream()
-                                    .filter(r -> r.getEvent().equals(e.getId()))
-                                    .count(),
-                            categoriesByRequests.get(e.getCategory()),
-                            usersByRequests.get(e.getInitiator())))
-                    .toList();
-        }
-
-        if (!eventDtos.isEmpty()) {
-            HashMap<Long, Integer> eventIdsWithViewsCounter = new HashMap<>();
-            LocalDateTime startTime = LocalDateTime.parse(eventDtos.getFirst().getCreatedOn().replace(" ", "T"));
-
-            ArrayList<String> uris = new ArrayList<>();
-
-            for (EventFullDto dto : eventDtos) {
-                eventIdsWithViewsCounter.put(dto.getId(), 0);
-                uris.add("/events/" + dto.getId().toString());
-                if (startTime.isAfter(LocalDateTime.parse(dto.getCreatedOn().replace(" ", "T")))) {
-                    startTime = LocalDateTime.parse(dto.getCreatedOn().replace(" ", "T"));
-                }
-            }
-
-            List<StatsResponseDto> viewsCounter = statsClient.getStats(startTime, LocalDateTime.now(), uris, true);
-
-            for (StatsResponseDto statsDto : viewsCounter) {
-                String[] split = statsDto.getUri().split("/");
-                eventIdsWithViewsCounter.put(Long.parseLong(split[2]), Math.toIntExact(statsDto.getHits()));
-            }
-
-            ArrayList<Long> longs = new ArrayList<>(eventIdsWithViewsCounter.keySet());
-            List<EventRequestDto> requests = requestFeignClient.getByEventAndStatus(longs, "CONFIRMED");
-
-            return eventDtos.stream()
-                    .peek(dto -> dto.setConfirmedRequests(
-                            requests.stream()
-                                    .filter((request -> request.getEvent().equals(dto.getId())))
-                                    .count()
-                    ))
-                    .peek(dto -> dto.setViews(eventIdsWithViewsCounter.get(dto.getId())))
-                    .collect(Collectors.toList());
-        } else {
+        if (events.isEmpty()) {
             return Collections.emptyList();
         }
+
+        List<EventFullDto> eventDtos = convertEventsToDtos(events);
+        return enrichEventsWithAdditionalData(eventDtos);
     }
 
     @Override
@@ -175,10 +81,6 @@ public class AdminEventServiceImpl implements AdminEventService {
             throw new ConflictException("Событие не в состоянии \"Ожидание публикации\", изменение события невозможно");
         }
 
-        if ((!StateAction.REJECT_EVENT.toString().equals(updateRequest.getStateAction()) && event.getState().equals(EventState.PUBLISHED))) {
-            throw new ConflictException("Отклонить опубликованное событие невозможно");
-        }
-
         updateEventWithAdminRequest(event, updateRequest);
         if (event.getEventDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Событие уже завершилось");
@@ -189,6 +91,130 @@ public class AdminEventServiceImpl implements AdminEventService {
         EventFullDto eventFullDto = getEventFullDto(event);
 
         return getViewsCounter(eventFullDto);
+    }
+
+    private void validateTimeRange(LocalDateTime rangeStart, LocalDateTime rangeEnd) throws ValidationException {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            throw new ValidationException("Время начала поиска позже времени конца поиска");
+        }
+    }
+
+    private List<EventState> parseEventStates(List<String> states) {
+        if (states == null || states.isEmpty()) {
+            return Arrays.stream(EventState.values()).toList();
+        }
+        return states.stream().map(EventState::valueOf).toList();
+    }
+
+    private Map<Long, Event> fetchEvents(List<Long> users, List<EventState> eventStates,
+                                         List<Long> categories, LocalDateTime rangeStart,
+                                         LocalDateTime rangeEnd, Integer from, Integer size) {
+
+        if (users == null && categories == null) {
+            return eventRepository.findAll(PageRequest.of(from / size, size))
+                    .getContent()
+                    .stream()
+                    .collect(Collectors.toMap(Event::getId, e -> e));
+        }
+
+        return eventRepository.findAllEventsWithDates(users, eventStates, categories,
+                        rangeStart, rangeEnd,
+                        PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "e.eventDate")))
+                .stream()
+                .collect(Collectors.toMap(Event::getId, e -> e));
+    }
+
+    private List<EventFullDto> convertEventsToDtos(Map<Long, Event> events) {
+
+        List<Long> eventIds = extractEventIds(events);
+        List<Long> userIds = extractUserIds(events);
+        Set<Long> categoryIds = extractCategoryIds(events);
+
+        List<EventRequestDto> requests = requestFeignClient.findByEventIds(eventIds);
+        Map<Long, UserDto> users = fetchUsers(userIds, events.size());
+        Map<Long, CategoryDto> categories = fetchCategories(categoryIds);
+
+        return events.values().stream()
+                .map(event -> mapEventToFullDto(event, requests, users, categories))
+                .toList();
+    }
+
+    private List<Long> extractEventIds(Map<Long, Event> events) {
+        return events.values().stream()
+                .map(Event::getId)
+                .toList();
+    }
+
+    private List<Long> extractUserIds(Map<Long, Event> events) {
+        return events.values().stream()
+                .map(Event::getInitiator)
+                .toList();
+    }
+
+    private Set<Long> extractCategoryIds(Map<Long, Event> events) {
+        return events.values().stream()
+                .map(Event::getCategory)
+                .collect(Collectors.toSet());
+    }
+
+    private Map<Long, UserDto> fetchUsers(List<Long> userIds, int eventsSize) {
+        return userFeignClient.getUsersList(userIds, 0, Math.max(eventsSize, 1))
+                .stream()
+                .collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
+    }
+
+    private Map<Long, CategoryDto> fetchCategories(Set<Long> categoryIds) {
+        return categoryFeignClient.getCategoriesByIds(categoryIds)
+                .stream()
+                .collect(Collectors.toMap(CategoryDto::getId, categoryDto -> categoryDto));
+    }
+
+    private EventFullDto mapEventToFullDto(Event event, List<EventRequestDto> requests,
+                                           Map<Long, UserDto> users, Map<Long, CategoryDto> categories) {
+
+        long confirmedRequestsCount = countConfirmedRequestsForEvent(requests, event.getId());
+        CategoryDto categoryDto = categories.get(event.getCategory());
+        UserDto userDto = users.get(event.getInitiator());
+
+        return EventMapper.mapEventToFullDto(event, confirmedRequestsCount, categoryDto, userDto);
+    }
+
+    private long countConfirmedRequestsForEvent(List<EventRequestDto> requests, Long eventId) {
+        return requests.stream()
+                .filter(request -> request.getEvent().equals(eventId))
+                .count();
+    }
+
+    private List<EventFullDto> enrichEventsWithAdditionalData(List<EventFullDto> eventDtos) {
+        List<Long> eventIds = eventDtos.stream()
+                .map(EventFullDto::getId)
+                .toList();
+
+        List<EventRequestDto> confirmedRequests = requestFeignClient.getByEventAndStatus(eventIds, "CONFIRMED");
+        Map<Long, Double> eventRatings = fetchEventRatings(eventIds);
+
+        return eventDtos.stream()
+                .map(dto -> enrichSingleEvent(dto, confirmedRequests, eventRatings))
+                .toList();
+    }
+
+    private Map<Long, Double> fetchEventRatings(List<Long> eventIds) {
+        return analyzerGrpcClient.getInteractionsCount(getInteractionsRequest(eventIds))
+                .stream()
+                .collect(Collectors.toMap(RecommendedEventProto::getEventId, RecommendedEventProto::getScore));
+    }
+
+    private EventFullDto enrichSingleEvent(EventFullDto dto, List<EventRequestDto> confirmedRequests,
+                                           Map<Long, Double> eventRatings) {
+
+        long confirmedCount = confirmedRequests.stream()
+                .filter(request -> request.getEvent().equals(dto.getId()))
+                .count();
+
+        dto.setConfirmedRequests(confirmedCount);
+        dto.setRating(eventRatings.getOrDefault(dto.getId(), 0.0));
+
+        return dto;
     }
 
     private EventFullDto getEventFullDto(Event event) throws NotFoundException {
@@ -252,20 +278,21 @@ public class AdminEventServiceImpl implements AdminEventService {
         }
     }
 
-    void saveLocation(Event event) {
+    private void saveLocation(Event event) {
         event.setLocation(locationRepository.save(event.getLocation()));
     }
 
     private EventFullDto getViewsCounter(EventFullDto eventFullDto) {
 
-        ArrayList<String> urls = new ArrayList<>(List.of("/events/" + eventFullDto.getId()));
+        List<RecommendedEventProto> protos = analyzerGrpcClient.getInteractionsCount(
+                InteractionsCountRequestProto.newBuilder().addAllEventId((List.of(eventFullDto.getId()))).build());
 
-        LocalDateTime start = LocalDateTime.parse(eventFullDto.getCreatedOn(), DateTimeFormatter.ofPattern(JsonFormatPattern.TIME_PATTERN));
-        LocalDateTime end = LocalDateTime.now();
-
-        Integer views = statsClient.getStats(start, end, urls, true).size();
-        eventFullDto.setViews(views);
+        Double rating = protos.isEmpty() ? 0.0 : protos.getFirst().getScore();
+        eventFullDto.setRating(rating);
         return eventFullDto;
     }
 
+    private InteractionsCountRequestProto getInteractionsRequest(List<Long> eventId) {
+        return InteractionsCountRequestProto.newBuilder().addAllEventId(eventId).build();
+    }
 }
